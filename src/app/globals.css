@@ -1,0 +1,419 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Design tokens — Héra Bijouterie
+   Warm ivory canvas, espresso ink, champagne gold.
+--------------------------------------------------------------------------- */
+@theme {
+  --color-cream: #fdfaf5;
+  --color-cream-deep: #f7efe4;
+  --color-cream-panel: #fffdfa;
+  --color-ink: #1f1512;
+  --color-ink-soft: #5c453d;
+  --color-ink-muted: #8a7167;
+  --color-espresso: #2a1f1b;
+  --color-espresso-light: #4d312d;
+  --color-gold: #c19a5b;
+  --color-gold-light: #dfc79a;
+  --color-gold-pale: #f4e7c9;
+  --color-line: #ebddbe;
+
+  --shadow-soft: 0 1px 2px rgba(42, 31, 27, 0.04), 0 8px 24px -12px rgba(42, 31, 27, 0.14);
+  --shadow-lift: 0 2px 4px rgba(42, 31, 27, 0.05), 0 24px 48px -20px rgba(42, 31, 27, 0.28);
+  --shadow-hero: 0 40px 90px -30px rgba(42, 31, 27, 0.45);
+
+  --ease-silk: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --animate-fade-up: fade-up 0.7s var(--ease-silk) both;
+  --animate-fade-in: fade-in 0.6s var(--ease-silk) both;
+  --animate-scale-in: scale-in 0.45s var(--ease-silk) both;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-pop: pop 0.35s var(--ease-silk);
+  --animate-slide-down: slide-down 0.35s var(--ease-silk) both;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+}
+
+:root {
+  --background: #fdfaf5;
+  --foreground: #1f1512;
+  --muted: #5c453d;
+  --gold: #c19a5b;
+  --gold-soft: #f4e7c9;
+  --panel: #fffdfa;
+  --deep: #2a1f1b;
+  --header-height: 76px;
+}
+
+/* ---------------------------------------------------------------------------
+   Base
+--------------------------------------------------------------------------- */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--header-height) + 16px);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "kern", "liga", "calt";
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+body[data-scroll-locked="true"] {
+  overflow: hidden;
+}
+
+.font-display {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-feature-settings: "kern", "liga", "dlig";
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+::selection {
+  background: var(--color-gold-pale);
+  color: var(--color-espresso);
+}
+
+/* Consistent, quiet focus ring across the whole site */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+
+textarea:focus-visible {
+  border-radius: 22px;
+}
+
+/* Every interactive element eases by default — the core of "smooth" */
+:where(a, button, input, textarea, select, summary, label[role="button"]) {
+  transition:
+    color 0.25s var(--ease-silk),
+    background-color 0.25s var(--ease-silk),
+    border-color 0.25s var(--ease-silk),
+    box-shadow 0.3s var(--ease-silk),
+    opacity 0.25s var(--ease-silk),
+    transform 0.3s var(--ease-silk);
+}
+
+/* Slim gold scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #d9c3a0 transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #ded0b6;
+  border: 3px solid var(--background);
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold);
+}
+
+/* ---------------------------------------------------------------------------
+   Keyframes
+--------------------------------------------------------------------------- */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -14px, 0);
+  }
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.28);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Utilities
+--------------------------------------------------------------------------- */
+
+/* Scroll reveal — see <Reveal /> */
+.reveal {
+  opacity: 0;
+  transform: translate3d(0, 28px, 0);
+  transition:
+    opacity 0.85s var(--ease-out-soft),
+    transform 0.85s var(--ease-out-soft);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+.reveal[data-visible="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Skeleton shimmer */
+.skeleton {
+  background-image: linear-gradient(
+    100deg,
+    #f2e9dc 20%,
+    #faf4ea 40%,
+    #f2e9dc 60%
+  );
+  background-size: 200% 100%;
+  animation: var(--animate-shimmer);
+}
+
+/* Champagne text gradient for accent words */
+.text-gilded {
+  background: linear-gradient(100deg, #b98a4b 0%, #e5c98f 45%, #a9773c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Thin gold rule */
+.rule-gold {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(193, 154, 91, 0.55),
+    transparent
+  );
+}
+
+/* Card that lifts on hover */
+.card-lift {
+  transition:
+    transform 0.5s var(--ease-silk),
+    box-shadow 0.5s var(--ease-silk),
+    border-color 0.5s var(--ease-silk);
+}
+
+.card-lift:hover {
+  transform: translate3d(0, -6px, 0);
+  box-shadow: var(--shadow-lift);
+}
+
+/* Underline that draws in from the left */
+.link-underline {
+  position: relative;
+}
+
+.link-underline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  height: 1px;
+  width: 100%;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s var(--ease-silk);
+}
+
+.link-underline:hover::after,
+.link-underline[data-active="true"]::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Buttons get a gentle press */
+.press:active {
+  transform: scale(0.97);
+}
+
+/* Infinite logo/claim strip */
+.marquee-track {
+  animation: marquee 32s linear infinite;
+}
+
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* Sheen that sweeps a dark button on hover */
+.sheen {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.sheen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.22) 50%,
+    transparent 70%
+  );
+  transform: translateX(-120%);
+  transition: transform 0.75s var(--ease-silk);
+}
+
+.sheen:hover::before {
+  transform: translateX(120%);
+}
+
+/* Progressive image fade-in (paired with onLoad in ProductCard) */
+.img-fade {
+  opacity: 0;
+  transition: opacity 0.6s var(--ease-silk);
+}
+
+.img-fade[data-loaded="true"] {
+  opacity: 1;
+}
+
+/* Route transition for <main> */
+.page-enter {
+  animation: fade-up 0.5s var(--ease-silk) both;
+}
+
+/* ---------------------------------------------------------------------------
+   Accessibility
+--------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media print {
+  header,
+  footer {
+    display: none;
+  }
+}

@@ -61,14 +61,30 @@ export const authOptions: AuthOptions = {
     }),
   ],
   callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = (user as { role?: string }).role ?? "customer";
+      }
+
+      if (!token.sub) {
+        return token;
+      }
+
+      const dbUser = await prisma.user.findUnique({
+        where: { id: token.sub },
+        select: { role: true },
+      });
+
+      if (dbUser) {
+        token.role = dbUser.role;
+      }
+
+      return token;
+    },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.sub ?? "";
-        const user = await prisma.user.findUnique({
-          where: { id: token.sub ?? "" },
-          select: { role: true },
-        });
-        session.user.role = user?.role ?? "customer";
+        session.user.role = (token.role as string | undefined) ?? "customer";
       }
       return session;
     },

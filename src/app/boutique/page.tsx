@@ -18,8 +18,41 @@ const sortOptions = [
 
 type SortValue = (typeof sortOptions)[number]["value"];
 
+type ProductRow = {
+  id: string;
+  slug: string;
+  name: string;
+  category: string;
+  material: string;
+  price: number;
+  compareAt?: number | null;
+  rating?: number | null;
+  reviews?: number | null;
+  stock: number;
+  badge?: string | null;
+  image: string;
+  gallery?: string | string[] | null;
+  description: string;
+  longDescription: string;
+  features?: string | string[] | null;
+  sizeOptions?: string | string[] | null;
+  color?: string | null;
+};
+
+function parseJsonArray(value: string | string[] | null | undefined): string[] {
+  if (Array.isArray(value)) return value;
+  if (!value) return [];
+
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
 // Parse product data from database
-function parseProduct(row: any): Product {
+function parseProduct(row: ProductRow): Product {
   return {
     id: row.id,
     slug: row.slug,
@@ -27,17 +60,17 @@ function parseProduct(row: any): Product {
     category: row.category,
     material: row.material,
     price: row.price,
-    compareAtPrice: row.compareAt,
+    compareAtPrice: row.compareAt ?? undefined,
     rating: row.rating || 0,
     reviews: row.reviews || 0,
     stock: row.stock,
     badge: row.badge,
     image: row.image,
-    gallery: Array.isArray(row.gallery) ? row.gallery : JSON.parse(row.gallery || "[]"),
+    gallery: parseJsonArray(row.gallery),
     description: row.description,
     longDescription: row.longDescription,
-    features: Array.isArray(row.features) ? row.features : JSON.parse(row.features || "[]"),
-    sizeOptions: Array.isArray(row.sizeOptions) ? row.sizeOptions : JSON.parse(row.sizeOptions || "[]"),
+    features: parseJsonArray(row.features),
+    sizeOptions: parseJsonArray(row.sizeOptions),
     color: row.color,
   };
 }

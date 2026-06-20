@@ -68,7 +68,7 @@ export const authOptions: AuthOptions = {
           where: { id: token.sub ?? "" },
           select: { role: true },
         });
-        (session.user as any).role = user?.role ?? "customer";
+        session.user.role = user?.role ?? "customer";
       }
       return session;
     },

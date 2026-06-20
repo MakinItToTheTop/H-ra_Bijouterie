@@ -83,7 +83,7 @@ export default function AdminPage() {
       return;
     }
 
-    const userRole = (session.user as any)?.role;
+    const userRole = session.user?.role;
     if (userRole !== "admin") {
       router.push("/");
       return;
@@ -99,19 +99,6 @@ export default function AdminPage() {
       labor: parseFloat(form.labor) || 120,
     });
   }, [form.material, form.weightGrams, form.purity, form.marketRate, form.labor, metalPrices]);
-
-  useEffect(() => {
-    fetchProducts();
-    fetchMetalPrices();
-    
-    pollIntervalRef.current = setInterval(() => {
-      fetchMetalPrices();
-    }, 10000);
-
-    return () => {
-      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
-    };
-  }, []);
 
   const fetchProducts = async () => {
     try {
@@ -134,6 +121,19 @@ export default function AdminPage() {
       console.error("Erreur lors de la récupération des prix des métaux", error);
     }
   };
+
+  useEffect(() => {
+    fetchProducts();
+    fetchMetalPrices();
+
+    pollIntervalRef.current = setInterval(() => {
+      fetchMetalPrices();
+    }, 10000);
+
+    return () => {
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+    };
+  }, []);
 
   const updateForm = <K extends keyof ProductForm>(key: K, value: ProductForm[K]) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -264,7 +264,7 @@ export default function AdminPage() {
     );
   }
 
-  if (!session || !session.user || (session.user as any)?.role !== "admin") {
+  if (!session || !session.user || session.user.role !== "admin") {
     return (
       <div className="min-h-screen bg-[#fffdfb] px-4 py-8 lg:px-6">
         <div className="mx-auto max-w-6xl rounded-[28px] border border-dashed border-[#e5d1ab] bg-[#fffaf3] p-12 text-center">

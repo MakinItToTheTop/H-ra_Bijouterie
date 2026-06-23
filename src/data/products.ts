@@ -125,7 +125,71 @@ export const categories: { name: ProductCategory; description: string; image: st
   },
 ];
 
-export const products: Product[] = [];
+export const products: Product[] = [
+  {
+    id: "prod-bague-etoile-dor",
+    slug: "bague-etoile-dor",
+    name: "Bague Étoile d'Or",
+    category: "Bagues",
+    material: "Or 18 carats",
+    price: 580,
+    compareAtPrice: 690,
+    rating: 4.9,
+    reviews: 128,
+    stock: 12,
+    badge: "Best-seller",
+    image: "/images/bague-etoile.jpg",
+    gallery: ["/images/bague-etoile.jpg", "/images/bague-etoile-2.jpg"],
+    description: "Une bague signée d’un éclat discret et lumineux.",
+    longDescription:
+      "Bague en or 18 carats avec finition polie. Une pièce raffinée, idéale pour les célébrations et les moments précieux.",
+    features: ["Or 18 carats", "Finition miroir", "Protection de l’émail"],
+    sizeOptions: ["48", "50", "52", "54", "56"],
+    color: "Or jaune",
+  },
+  {
+    id: "prod-collier-lune-bleue",
+    slug: "collier-lune-bleue",
+    name: "Collier Lune Bleue",
+    category: "Colliers",
+    material: "Argent 925",
+    price: 430,
+    compareAtPrice: 520,
+    rating: 4.8,
+    reviews: 96,
+    stock: 9,
+    badge: null,
+    image: "/images/collier-lune.jpg",
+    gallery: ["/images/collier-lune.jpg", "/images/collier-lune-2.jpg"],
+    description: "Collier léger à l’éclat profond et élégant.",
+    longDescription:
+      "Un collier délicat et sophistiqué en argent 925, pensé pour les tenues du quotidien comme les occasions festives.",
+    features: ["Argent 925", "Pendentif fini", "Fixation sécurisée"],
+    sizeOptions: ["40 cm", "45 cm", "50 cm"],
+    color: "Bleu profond",
+  },
+  {
+    id: "prod-bracelet-serein",
+    slug: "bracelet-serein",
+    name: "Bracelet Serein",
+    category: "Bracelets",
+    material: "Or blanc",
+    price: 390,
+    compareAtPrice: 450,
+    rating: 4.7,
+    reviews: 74,
+    stock: 15,
+    badge: "Nouveau",
+    image: "/images/bracelet-serein.jpg",
+    gallery: ["/images/bracelet-serein.jpg", "/images/bracelet-serein-2.jpg"],
+    description: "Bracelet raffiné au design au plus près du quotidien.",
+    longDescription:
+      "Un bracelet en or blanc, léger et régulier, conçu pour un style chic et discret au quotidien.",
+    features: ["Or blanc", "Très léger", "Résistant au port quotidien"],
+    sizeOptions: ["16 cm", "18 cm", "20 cm"],
+    color: "Or blanc",
+  },
+];
 
 export const testimonials = [
   {

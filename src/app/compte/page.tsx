@@ -35,6 +35,11 @@ export default function ComptePage() {
     router.refresh();
   };
 
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: "/" });
+    router.refresh();
+  };
+
   if (status === "loading") {
     return <div className="mx-auto max-w-6xl px-4 py-12 text-[#5c453d]">Chargement...</div>;
   }
@@ -49,7 +54,7 @@ export default function ComptePage() {
           <div className="mt-6 flex flex-wrap gap-4">
             <button
               type="button"
-              onClick={() => signOut({ callbackUrl: "/compte" })}
+              onClick={handleLogout}
               className="rounded-full bg-[#2a1f1b] px-5 py-3 text-sm font-medium text-white"
             >
               Se déconnecter

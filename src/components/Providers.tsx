@@ -6,7 +6,7 @@ import { ToastProvider } from "@/components/Toast";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <SessionProvider>
+    <SessionProvider refetchInterval={0} refetchOnWindowFocus={false}>
       <ToastProvider>
         <CartProvider>{children}</CartProvider>
       </ToastProvider>

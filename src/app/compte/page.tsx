@@ -36,8 +36,7 @@ export default function ComptePage() {
   };
 
   const handleLogout = async () => {
-    await signOut({ callbackUrl: "/" });
-    router.refresh();
+    await signOut({ redirect: true, callbackUrl: "/" });
   };
 
   if (status === "loading") {

@@ -1,21 +1,14 @@
 import { NextResponse } from "next/server";
 
-<<<<<<< HEAD
 // Prix de repli utilisés uniquement si l'API externe est indisponible
 // (clé absente, quota dépassé, panne réseau...).
 const FALLBACK_PRICES_PER_GRAM: Record<string, number> = {
-=======
-// Prix des métaux en €/gramme (approximatifs pour développement)
-// En production, ces données viendraient d'une API externe
-const metalPrices: Record<string, number> = {
->>>>>>> 9defbd9fe45c07c4a3655e6346ce7f98a77502ed
   "Or 18 carats": 65,
   "Or blanc": 65,
   "Argent 925": 0.85,
   "Plaqué or": 0.05,
 };
 
-<<<<<<< HEAD
 const TROY_OUNCE_IN_GRAMS = 31.1034768;
 
 // Puretés utilisées pour dériver un prix/gramme "matière travaillée"
@@ -83,23 +76,10 @@ async function fetchLiveMetalPrices(): Promise<{
 
 function round2(value: number) {
   return Math.round(value * 100) / 100;
-=======
-// Simule une variation en temps réel
-function getMetalPrices() {
-  const variation = Math.random() * 0.98 + 0.95; // Variation de ±5%
-  const prices: Record<string, number> = {};
-
-  for (const [metal, basePrice] of Object.entries(metalPrices)) {
-    prices[metal] = Math.round(basePrice * variation * 100) / 100;
-  }
-
-  return prices;
->>>>>>> 9defbd9fe45c07c4a3655e6346ce7f98a77502ed
 }
 
 export async function GET() {
   try {
-<<<<<<< HEAD
     const live = await fetchLiveMetalPrices();
 
     if (live) {
@@ -116,18 +96,10 @@ export async function GET() {
       prices: FALLBACK_PRICES_PER_GRAM,
       timestamp: new Date().toISOString(),
       source: "fallback",
-=======
-    const prices = getMetalPrices();
-    return NextResponse.json({
-      ok: true,
-      prices,
-      timestamp: new Date().toISOString(),
->>>>>>> 9defbd9fe45c07c4a3655e6346ce7f98a77502ed
     });
   } catch (error) {
     console.error("Error fetching metal prices:", error);
     return NextResponse.json(
-<<<<<<< HEAD
       {
         ok: false,
         message: "Impossible de récupérer les prix des métaux",
@@ -135,10 +107,6 @@ export async function GET() {
         source: "fallback",
       },
       { status: 500 },
-=======
-      { ok: false, message: "Impossible de récupérer les prix des métaux", prices: metalPrices },
-      { status: 500 }
->>>>>>> 9defbd9fe45c07c4a3655e6346ce7f98a77502ed
     );
   }
 }

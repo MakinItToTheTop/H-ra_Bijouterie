@@ -50,15 +50,23 @@ export default function ComptePage() {
           <p className="text-xs uppercase tracking-[0.28em] text-[#8b6a4b]">Compte client</p>
           <h1 className="mt-3 font-display text-5xl text-[#231711]">Bonjour {session.user?.name || session.user?.email}</h1>
           <p className="mt-4 text-[#5c453d]">Vous êtes connecté à votre espace Héra Bijouterie.</p>
-          <div className="mt-6 flex flex-wrap gap-4">
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="rounded-full bg-[#2a1f1b] px-5 py-3 text-sm font-medium text-white"
-            >
-              Se déconnecter
-            </button>
-          </div>
+<div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+  <button
+    type="button"
+    onClick={handleLogout}
+    className="rounded-full bg-[#2a1f1b] px-5 py-3 text-sm font-medium text-white"
+  >
+    Se déconnecter
+  </button>
+  {session.user?.role === "admin" && (
+    <Link
+      href="/admin"
+      className="rounded-full border border-[#c19a5b] px-5 py-3 text-sm font-medium text-[#7a5d41] transition hover:bg-[#fffaf3]"
+    >
+      Gérer les produits →
+    </Link>
+  )}
+</div>
         </div>
 
         <div className="mt-8 grid gap-8 lg:grid-cols-2">

@@ -389,6 +389,39 @@ textarea:focus-visible {
 }
 
 /* ---------------------------------------------------------------------------
+   Custom cursor
+   Native cursor hidden only on fine-pointer devices (mouse/trackpad), so
+   touch devices keep normal tap behaviour untouched.
+--------------------------------------------------------------------------- */
+@media (hover: hover) and (pointer: fine) {
+  html,
+  body,
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  [role="button"],
+  label {
+    cursor: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html,
+  body,
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  [role="button"],
+  label {
+    cursor: auto;
+  }
+}
+
+/* ---------------------------------------------------------------------------
    Accessibility
 --------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {

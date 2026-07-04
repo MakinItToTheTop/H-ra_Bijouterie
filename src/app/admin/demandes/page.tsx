@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Mail, Phone } from "lucide-react";
+import { ArrowLeft, Mail, Phone, Trash2 } from "lucide-react";
 
 type ContactRequestRecord = {
   id: string;
@@ -62,6 +62,24 @@ export default function AdminContactRequestsPage() {
       setRequests((prev) => prev.map((r) => (r.id === item.id ? { ...r, status: item.status } : r)));
     }
   };
+
+  const deleteRequest = async (item: ContactRequestRecord) => {
+  const confirmed = window.confirm(
+    `Supprimer définitivement la demande de ${item.name} ? Cette action est irréversible.`,
+  );
+  if (!confirmed) return;
+
+  const previous = requests;
+  setRequests((prev) => prev.filter((r) => r.id !== item.id));
+
+  const response = await fetch(`/api/admin/contact-requests?id=${item.id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    setRequests(previous);
+  }
+};
 
   if (status === "loading" || isLoading) {
     return (
@@ -144,17 +162,29 @@ export default function AdminContactRequestsPage() {
                     </span>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => toggleStatus(item)}
-                  className={`shrink-0 rounded-full px-4 py-2 text-xs font-medium uppercase tracking-wide transition ${
-                    item.status === "nouveau"
-                      ? "bg-[#231711] text-white hover:bg-[#3a2a20]"
-                      : "border border-line bg-[#fffaf3] text-ink-soft hover:border-gold"
-                  }`}
-                >
-                  {item.status === "nouveau" ? "Marquer comme traité" : "Traité ✓"}
-                </button>
+                <div className="flex shrink-0 items-center gap-2">
+  <button
+    type="button"
+    onClick={() => toggleStatus(item)}
+    className={`rounded-full px-4 py-2 text-xs font-medium uppercase tracking-wide transition ${
+      item.status === "nouveau"
+        ? "bg-[#231711] text-white hover:bg-[#3a2a20]"
+        : "border border-line bg-[#fffaf3] text-ink-soft hover:border-gold"
+    }`}
+  >
+    {item.status === "nouveau" ? "Marquer comme traité" : "Traité ✓"}
+  </button>
+  {item.status === "traité" && (
+    <button
+      type="button"
+      onClick={() => deleteRequest(item)}
+      title="Supprimer cette demande"
+      className="rounded-full border border-transparent p-2 text-ink-soft transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+    >
+      <Trash2 className="h-4 w-4" />
+    </button>
+  )}
+</div>
               </div>
               <p className="mt-4 whitespace-pre-wrap rounded-2xl bg-[#fffaf3] p-4 text-sm leading-6 text-[#43352f]">
                 {item.message}

@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { calculateJewelryPrice, jewelryMaterials } from "@/lib/pricing";
+import Link from "next/link";
 
 const defaultForm = {
   id: "",
@@ -279,15 +280,23 @@ export default function AdminPage() {
     <div className="min-h-screen bg-[#fffdfb] px-4 py-8 lg:px-6">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 flex items-center justify-between">
-          <h1 className="font-display text-5xl text-[#231711]">Gestion des produits</h1>
-          <button
-            onClick={() => setIsFormOpen(!isFormOpen)}
-            className="flex items-center gap-2 rounded-full bg-[#2a1f1b] px-5 py-3 text-white hover:bg-[#3a2f2b]"
-          >
-            <Plus size={20} />
-            Nouveau produit
-          </button>
-        </div>
+  <h1 className="font-display text-5xl text-[#231711]">Gestion des produits</h1>
+  <div className="flex items-center gap-3">
+    <Link
+      href="/admin/demandes"
+      className="flex items-center gap-2 rounded-full border border-[#c19a5b] px-5 py-3 text-sm font-medium text-[#7a5d41] transition hover:bg-[#fffaf3]"
+    >
+      Demandes reçues
+    </Link>
+    <button
+      onClick={() => setIsFormOpen(!isFormOpen)}
+      className="flex items-center gap-2 rounded-full bg-[#2a1f1b] px-5 py-3 text-white hover:bg-[#3a2f2b]"
+    >
+      <Plus size={20} />
+      Nouveau produit
+    </button>
+  </div>
+</div>
 
         {/* Métal Prices Display */}
         <div className="mb-8 rounded-[20px] border border-[#e5d1ab] bg-white p-6">

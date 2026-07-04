@@ -53,3 +53,26 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ ok: false, message: "Échec de la mise à jour." }, { status: 500 });
   }
 }
+
+export async function DELETE(request: Request) {
+  const session = await requireAdmin();
+  if (!session) {
+    return NextResponse.json({ ok: false, message: "Non autorisé." }, { status: 403 });
+  }
+
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ ok: false, message: "Identifiant manquant." }, { status: 400 });
+    }
+
+    await prisma.contactRequest.delete({ where: { id } });
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("Delete contact request error", error);
+    return NextResponse.json({ ok: false, message: "Échec de la suppression." }, { status: 500 });
+  }
+}

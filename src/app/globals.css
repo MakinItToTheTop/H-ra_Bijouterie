@@ -103,9 +103,11 @@ select {
   color: inherit;
 }
 
-a {
-  text-decoration: none;
-  color: inherit;
+@layer base {
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
 }
 
 ::selection {

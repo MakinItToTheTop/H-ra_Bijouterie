@@ -81,11 +81,21 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user) {
+      return NextResponse.json({ ok: false, orders: [] }, { status: 401 });
+    }
+
+    const isAdmin = session.user.role === "admin";
+
     const orders = await prisma.order.findMany({
+      where: isAdmin ? undefined : { userId: session.user.id },
       orderBy: { createdAt: "desc" },
       include: { items: true },
       take: 50,
     });
+
     return NextResponse.json({ ok: true, orders });
   } catch (error) {
     console.error("Order fetch error", error);

@@ -3,7 +3,31 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn, signOut, useSession } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+type OrderItem = {
+  id: string;
+  name: string;
+  quantity: number;
+  price: number;
+};
+
+type Order = {
+  id: string;
+  total: number;
+  status: string;
+  shippingMode: string;
+  createdAt: string;
+  items: OrderItem[];
+};
+
+const statusLabels: Record<string, string> = {
+  "en attente": "En attente",
+  payée: "Payée",
+  expédiée: "Expédiée",
+  livrée: "Livrée",
+  annulée: "Annulée",
+};
 
 export default function ComptePage() {
   const router = useRouter();
@@ -12,6 +36,20 @@ export default function ComptePage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
+
+  useEffect(() => {
+    if (!session) return;
+
+    setOrdersLoading(true);
+    fetch("/api/orders")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.ok) setOrders(data.orders);
+      })
+      .finally(() => setOrdersLoading(false));
+  }, [session]);
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -50,31 +88,60 @@ export default function ComptePage() {
           <p className="text-xs uppercase tracking-[0.28em] text-[#8b6a4b]">Compte client</p>
           <h1 className="mt-3 font-display text-5xl text-[#231711]">Bonjour {session.user?.name || session.user?.email}</h1>
           <p className="mt-4 text-[#5c453d]">Vous êtes connecté à votre espace Héra Bijouterie.</p>
-<div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-  <button
-    type="button"
-    onClick={handleLogout}
-    className="rounded-full bg-[#2a1f1b] px-5 py-3 text-sm font-medium text-white"
-  >
-    Se déconnecter
-  </button>
-  {session.user?.role === "admin" && (
-    <Link
-      href="/admin"
-      className="rounded-full border border-[#c19a5b] px-5 py-3 text-sm font-medium text-[#7a5d41] transition hover:bg-[#fffaf3]"
-    >
-      Gérer les produits →
-    </Link>
-  )}
-</div>
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="rounded-full bg-[#2a1f1b] px-5 py-3 text-sm font-medium text-white"
+            >
+              Se déconnecter
+            </button>
+            {session.user?.role === "admin" && (
+              <Link
+                href="/admin"
+                className="rounded-full border border-[#c19a5b] px-5 py-3 text-sm font-medium text-[#7a5d41] transition hover:bg-[#fffaf3]"
+              >
+                Gérer les produits →
+              </Link>
+            )}
+          </div>
         </div>
 
         <div className="mt-8 grid gap-8 lg:grid-cols-2">
           <div className="rounded-[30px] border border-[#ebddbe] bg-white p-6">
             <h2 className="font-display text-3xl text-[#231711]">Historique des commandes</h2>
             <div className="mt-5 space-y-3 text-[#4d3c35]">
-              <div className="flex items-center justify-between rounded-[18px] bg-[#fffaf3] p-4"><span>Commande #HERA-2026-1042</span><span className="text-[#7a5d41]">Payée</span></div>
-              <div className="flex items-center justify-between rounded-[18px] bg-[#fffaf3] p-4"><span>Commande #HERA-2026-9801</span><span className="text-[#7a5d41]">Expédiée</span></div>
+              {ordersLoading ? (
+                <p className="text-sm text-[#8b7364]">Chargement…</p>
+              ) : orders.length === 0 ? (
+                <p className="text-sm text-[#8b7364]">Vous n&apos;avez pas encore passé de commande.</p>
+              ) : (
+                orders.map((order) => (
+                  <div key={order.id} className="rounded-[18px] bg-[#fffaf3] p-4">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">Commande #{order.id.slice(-8).toUpperCase()}</span>
+                      <span className="text-[#7a5d41]">
+                        {statusLabels[order.status] ?? order.status}
+                      </span>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between text-xs text-[#8b7364]">
+                      <span>
+                        {order.items.map((item) => `${item.quantity}× ${item.name}`).join(", ")}
+                      </span>
+                      <span>
+                        {new Date(order.createdAt).toLocaleDateString("fr-FR", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </span>
+                    </div>
+                    <div className="mt-1 text-sm font-medium text-[#231711]">
+                      {order.total.toFixed(2)} €
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -127,11 +194,11 @@ export default function ComptePage() {
 
         <div className="space-y-6">
           <div className="rounded-[30px] border border-[#ebddbe] bg-white p-6">
-            <h2 className="font-display text-3xl text-[#231711]">Historique des commandes</h2>
-            <div className="mt-5 space-y-3 text-[#4d3c35]">
-              <div className="flex items-center justify-between rounded-[18px] bg-[#fffaf3] p-4"><span>Commande #HERA-2026-1042</span><span className="text-[#7a5d41]">Payée</span></div>
-              <div className="flex items-center justify-between rounded-[18px] bg-[#fffaf3] p-4"><span>Commande #HERA-2026-9801</span><span className="text-[#7a5d41]">Expédiée</span></div>
-            </div>
+            <h2 className="font-display text-3xl text-[#231711]">Vos avantages</h2>
+            <p className="mt-4 text-sm leading-6 text-[#5c453d]">
+              Connectez-vous pour retrouver votre historique de commandes, suivre vos livraisons
+              et enregistrer vos pièces favorites.
+            </p>
           </div>
 
           <div className="rounded-[30px] border border-[#ebddbe] bg-white p-6">

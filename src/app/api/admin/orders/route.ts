@@ -59,3 +59,39 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ ok: false, message: "Échec de la mise à jour." }, { status: 500 });
   }
 }
+
+export async function DELETE(request: Request) {
+  const session = await requireAdmin();
+  if (!session) {
+    return NextResponse.json({ ok: false, message: "Non autorisé." }, { status: 403 });
+  }
+
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ ok: false, message: "Requête invalide." }, { status: 400 });
+    }
+
+    const order = await prisma.order.findUnique({ where: { id } });
+
+    if (!order) {
+      return NextResponse.json({ ok: false, message: "Commande introuvable." }, { status: 404 });
+    }
+
+    if (order.status !== "livrée") {
+      return NextResponse.json(
+        { ok: false, message: "Seules les commandes livrées peuvent être supprimées." },
+        { status: 400 }
+      );
+    }
+
+    await prisma.order.delete({ where: { id } });
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("Admin order delete error", error);
+    return NextResponse.json({ ok: false, message: "Échec de la suppression." }, { status: 500 });
+  }
+}

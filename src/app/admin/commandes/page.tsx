@@ -76,6 +76,25 @@ export default function AdminOrdersPage() {
     }
   };
 
+  const deleteOrder = async (order: OrderRecord) => {
+    if (!window.confirm(`Supprimer définitivement la commande #${order.id.slice(-8).toUpperCase()} ?`)) {
+      return;
+    }
+
+    const previous = orders;
+    setOrders((prev) => prev.filter((o) => o.id !== order.id));
+
+    const response = await fetch(`/api/admin/orders?id=${order.id}`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      setOrders(previous);
+      const data = await response.json().catch(() => null);
+      alert(data?.message || "Échec de la suppression.");
+    }
+  };
+
   if (status === "loading" || isLoading) {
     return (
       <div className="mx-auto max-w-6xl px-4 py-14 lg:px-6">
@@ -176,6 +195,15 @@ export default function AdminOrdersPage() {
                       </option>
                     ))}
                   </select>
+                  {order.status === "livrée" && (
+                    <button
+                      type="button"
+                      onClick={() => deleteOrder(order)}
+                      className="text-xs font-medium text-[#a13d3d] hover:underline"
+                    >
+                      Supprimer
+                    </button>
+                  )}
                 </div>
               </div>
 

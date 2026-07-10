@@ -24,7 +24,6 @@ const defaultForm = {
   sizeOptions: "",
   color: "",
   weightGrams: "1.2",
-  purity: "18",
   marketRate: "70",
   labor: "120",
 };
@@ -95,11 +94,10 @@ export default function AdminPage() {
     return calculateJewelryPrice({
       material: form.material,
       weightGrams: parseFloat(form.weightGrams) || 1.2,
-      purity: parseInt(form.purity) || 18,
       marketRate: metalPrices[form.material] || parseFloat(form.marketRate) || 70,
       labor: parseFloat(form.labor) || 120,
     });
-  }, [form.material, form.weightGrams, form.purity, form.marketRate, form.labor, metalPrices]);
+  }, [form.material, form.weightGrams, form.marketRate, form.labor, metalPrices]);
 
   const fetchProducts = async () => {
     try {
@@ -167,7 +165,6 @@ export default function AdminPage() {
       sizeOptions: sizeOptions.join("\n"),
       color: product.color || "",
       weightGrams: "1.2",
-      purity: "18",
       marketRate: String(metalPrices[product.material] || 70),
       labor: "120",
     });

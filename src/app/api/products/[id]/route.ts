@@ -26,7 +26,6 @@ const productSchema = z.object({
 
 function buildPayload(data: z.infer<typeof productSchema>) {
   const weight = Number(data.weightGrams ?? 1.2);
-  const purity = Number(data.purity ?? 18);
   const marketRate = Number(data.marketRate ?? 70);
   const labor = Number(data.labor ?? 120);
 
@@ -35,7 +34,6 @@ function buildPayload(data: z.infer<typeof productSchema>) {
     calculateJewelryPrice({
       material: data.material,
       weightGrams: weight,
-      purity,
       marketRate,
       labor,
     });

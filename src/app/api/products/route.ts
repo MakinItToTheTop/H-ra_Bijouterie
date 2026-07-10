@@ -19,7 +19,6 @@ const productSchema = z.object({
   sizeOptions: z.array(z.string()).optional(),
   color: z.string().nullable().optional(),
   weightGrams: z.number().optional(),
-  purity: z.number().optional(),
   marketRate: z.number().optional(),
   labor: z.number().optional(),
 });
@@ -28,7 +27,6 @@ function buildPayload(data: z.infer<typeof productSchema>) {
   const computedPrice = calculateJewelryPrice({
     material: data.material,
     weightGrams: Number(data.weightGrams ?? 1.2),
-    purity: Number(data.purity ?? 18),
     marketRate: Number(data.marketRate ?? 70),
     labor: Number(data.labor ?? 120),
   });

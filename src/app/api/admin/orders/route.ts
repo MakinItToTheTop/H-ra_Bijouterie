@@ -48,15 +48,46 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ ok: false, message: "Requête invalide." }, { status: 400 });
     }
 
-    const updated = await prisma.order.update({
+    const existing = await prisma.order.findUnique({
       where: { id },
-      data: { status },
+      include: { items: true },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ ok: false, message: "Commande introuvable." }, { status: 404 });
+    }
+
+    // Le stock ne doit être décrémenté qu'une seule fois : au moment précis où
+    // la commande BASCULE vers "payée" (pas si elle l'était déjà).
+    const justPaid = status === "payée" && existing.status !== "payée";
+
+    const updated = await prisma.$transaction(async (tx) => {
+      if (justPaid) {
+        for (const item of existing.items) {
+          const product = await tx.product.findUnique({ where: { id: item.productId } });
+          if (!product || product.stock < item.quantity) {
+            throw new Error(
+              `Stock insuffisant pour "${item.name}" (disponible : ${product?.stock ?? 0}, demandé : ${item.quantity}).`
+            );
+          }
+        }
+
+        for (const item of existing.items) {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: { stock: { decrement: item.quantity } },
+          });
+        }
+      }
+
+      return tx.order.update({ where: { id }, data: { status } });
     });
 
     return NextResponse.json({ ok: true, order: updated });
   } catch (error) {
     console.error("Admin order update error", error);
-    return NextResponse.json({ ok: false, message: "Échec de la mise à jour." }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Échec de la mise à jour.";
+    return NextResponse.json({ ok: false, message }, { status: 500 });
   }
 }
 

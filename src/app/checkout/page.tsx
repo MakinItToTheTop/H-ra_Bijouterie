@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle2, CreditCard, Loader2, Lock, Store, Truck } from "lucide-react";
 import { useCart } from "@/context/CartContext";
@@ -13,12 +14,20 @@ import {
 
 type ShippingMode = "retrait" | "livraison";
 
-export default function CheckoutPage() {
+function CheckoutPageContent() {
   const { items, subtotal, clearCart, hydrated } = useCart();
+  const searchParams = useSearchParams();
   const [shippingMode, setShippingMode] = useState<ShippingMode>("livraison");
   const [status, setStatus] = useState<"idle" | "sending" | "done">("idle");
   const [error, setError] = useState("");
   const [orderId, setOrderId] = useState("");
+  useEffect(() => {
+    if (searchParams.get("success") === "1") {
+      setStatus("done");
+      clearCart();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const shipping =
     shippingMode === "retrait" || subtotal >= FREE_SHIPPING_THRESHOLD || subtotal === 0
@@ -338,5 +347,13 @@ export default function CheckoutPage() {
         </aside>
       </div>
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={null}>
+      <CheckoutPageContent />
+    </Suspense>
   );
 }

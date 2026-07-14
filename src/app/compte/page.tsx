@@ -39,9 +39,10 @@ export default function ComptePage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const isAdmin = session?.user?.role === "admin";
 
   useEffect(() => {
-    if (!session) return;
+    if (!session || isAdmin) return;
 
     setOrdersLoading(true);
     fetch("/api/orders")
@@ -50,7 +51,7 @@ export default function ComptePage() {
         if (data.ok) setOrders(data.orders);
       })
       .finally(() => setOrdersLoading(false));
-  }, [session]);
+  }, [session, isAdmin]);
 
   const cancelOrder = async (order: Order) => {
     if (!window.confirm(`Annuler la commande #${order.id.slice(-8).toUpperCase()} et être remboursé ?`)) {
@@ -134,7 +135,12 @@ export default function ComptePage() {
           <div className="rounded-[30px] border border-[#ebddbe] bg-white p-6">
             <h2 className="font-display text-3xl text-[#231711]">Historique des commandes</h2>
             <div className="mt-5 space-y-3 text-[#4d3c35]">
-              {ordersLoading ? (
+
+              {isAdmin ? (
+  <p className="text-sm text-[#8b7364]">
+    Les commandes ne sont pas disponibles pour un compte administrateur.
+  </p>
+) :ordersLoading ? (
                 <p className="text-sm text-[#8b7364]">Chargement…</p>
               ) : orders.length === 0 ? (
                 <p className="text-sm text-[#8b7364]">Vous n&apos;avez pas encore passé de commande.</p>

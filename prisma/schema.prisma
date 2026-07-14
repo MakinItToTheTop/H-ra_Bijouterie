@@ -65,15 +65,16 @@ model Product {
 }
 
 model Order {
-  id           String      @id @default(cuid())
-  userId       String?
-  user         User?       @relation(fields: [userId], references: [id])
-  total        Float
-  status       String      @default("en attente")
-  shippingMode String      @default("livraison")
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  items        OrderItem[]
+  id                     String      @id @default(cuid())
+  userId                 String?
+  user                   User?       @relation(fields: [userId], references: [id])
+  total                  Float
+  status                 String      @default("en attente")
+  shippingMode           String      @default("livraison")
+  stripePaymentIntentId  String?
+  createdAt              DateTime    @default(now())
+  updatedAt              DateTime    @updatedAt
+  items                  OrderItem[]
 }
 
 model OrderItem {

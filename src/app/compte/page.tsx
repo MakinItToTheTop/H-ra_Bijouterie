@@ -38,6 +38,7 @@ export default function ComptePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!session) return;
@@ -50,6 +51,28 @@ export default function ComptePage() {
       })
       .finally(() => setOrdersLoading(false));
   }, [session]);
+
+  const cancelOrder = async (order: Order) => {
+    if (!window.confirm(`Annuler la commande #${order.id.slice(-8).toUpperCase()} et être remboursé ?`)) {
+      return;
+    }
+
+    setCancellingId(order.id);
+
+    try {
+      const response = await fetch(`/api/orders/${order.id}/cancel`, { method: "POST" });
+      const data = await response.json();
+
+      if (!response.ok || !data.ok) {
+        alert(data.message ?? "L'annulation n'a pas pu être effectuée.");
+        return;
+      }
+
+      setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, status: "annulée" } : o)));
+    } finally {
+      setCancellingId(null);
+    }
+  };
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -139,6 +162,16 @@ export default function ComptePage() {
                     <div className="mt-1 text-sm font-medium text-[#231711]">
                       {order.total.toFixed(2)} €
                     </div>
+                    {order.status === "payée" && (
+                      <button
+                        type="button"
+                        onClick={() => cancelOrder(order)}
+                        disabled={cancellingId === order.id}
+                        className="mt-2 text-xs font-medium text-[#a13d3d] hover:underline disabled:opacity-60"
+                      >
+                        {cancellingId === order.id ? "Annulation…" : "Annuler et être remboursé"}
+                      </button>
+                    )}
                   </div>
                 ))
               )}

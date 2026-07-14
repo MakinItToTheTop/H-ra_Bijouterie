@@ -38,6 +38,8 @@ export async function POST(request: Request) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     const orderId = session.metadata?.orderId;
+    const paymentIntentId =
+      typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id;
 
     if (!orderId || orderId === "demo-order") {
       return NextResponse.json({ ok: true, skipped: true });
@@ -68,7 +70,7 @@ export async function POST(request: Request) {
 
           await tx.order.update({
             where: { id: orderId },
-            data: { status: "payée" },
+            data: { status: "payée", stripePaymentIntentId: paymentIntentId ?? null },
           });
         });
       }

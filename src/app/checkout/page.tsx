@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { CheckCircle2, CreditCard, Loader2, Lock, Store, Truck } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import {
@@ -16,6 +17,8 @@ type ShippingMode = "retrait" | "livraison";
 
 function CheckoutPageContent() {
   const { items, subtotal, clearCart, hydrated } = useCart();
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.role === "admin";
   const searchParams = useSearchParams();
   const [shippingMode, setShippingMode] = useState<ShippingMode>("livraison");
   const [status, setStatus] = useState<"idle" | "sending" | "done">("idle");
@@ -136,6 +139,25 @@ function CheckoutPageContent() {
             </Link>
           </div>
         </div>
+      </div>
+    );
+  }
+
+  if (isAdmin) {                                       // ← AJOUTER tout ce bloc
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-20 text-center lg:px-6">
+        <h1 className="font-display text-[clamp(2rem,4vw,2.75rem)] text-[#231711]">
+          Commande indisponible
+        </h1>
+        <p className="mt-4 text-ink-soft">
+          Un compte administrateur ne peut pas passer de commande.
+        </p>
+        <Link
+          href="/admin"
+          className="press mt-8 inline-flex rounded-full bg-espresso px-6 py-3.5 text-sm font-medium text-white hover:bg-espresso-light"
+        >
+          Retour à l'administration
+        </Link>
       </div>
     );
   }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
+import { stripe } from "@/lib/stripe";   
 
 type OrderItemInput = {
   id: string;
@@ -50,7 +51,7 @@ export async function POST(request: Request) {
       data: {
         userId: session?.user?.id ?? undefined,
         total: Number(body.total ?? 0),
-        status: "en attente",
+        status: stripe ? "en attente" : "payée",
         shippingMode: body.shippingMode ?? "livraison",
         items: {
           create: items.map((item) => ({

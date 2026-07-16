@@ -215,25 +215,32 @@ export default function AdminOrdersPage() {
                 </div>
               </div>
 
-              {order.shippingMode === "livraison" && (order.address || order.customerPhone) && (
+              {(order.customerFirstName || order.customerLastName || order.customerPhone || order.address) && (
   <div className="mt-4 rounded-2xl border border-[#e5d1ab] bg-[#fffaf3] p-4 text-sm text-[#43352f]">
     <p className="text-xs font-medium uppercase tracking-[0.2em] text-[#8b6a4b]">
-      Adresse de livraison
+      {order.shippingMode === "retrait" ? "Client à identifier (retrait en boutique)" : "Adresse de livraison"}
     </p>
-    <p className="mt-2">
+    <p className="mt-2 font-medium">
       {order.customerFirstName || order.customerLastName
         ? `${order.customerFirstName ?? ""} ${order.customerLastName ?? ""}`.trim()
         : order.user?.name || "Client"}
     </p>
-    {order.address && <p>{order.address}</p>}
-    {(order.postalCode || order.city) && (
-      <p>
-        {order.postalCode} {order.city}
-      </p>
+    {order.shippingMode === "livraison" && (
+      <>
+        {order.address && <p>{order.address}</p>}
+        {(order.postalCode || order.city) && (
+          <p>{order.postalCode} {order.city}</p>
+        )}
+        {order.country && <p>{order.country}</p>}
+      </>
     )}
-    {order.country && <p>{order.country}</p>}
-    {order.customerPhone && (
-      <p className="mt-1 text-[#8b7364]">Tél : {order.customerPhone}</p>
+    {order.customerEmail && <p className="mt-1 text-[#8b7364]">{order.customerEmail}</p>}
+    {order.customerPhone && <p className="text-[#8b7364]">Tél : {order.customerPhone}</p>}
+    {order.shippingMode === "retrait" && (
+      <p className="mt-2 text-xs text-[#a13d3d]">
+        Vérifier une pièce d'identité correspondant à ce nom avant de remettre la commande
+        (n° #{order.id.slice(-8).toUpperCase()}).
+      </p>
     )}
   </div>
 )}

@@ -11,6 +11,17 @@ type OrderItemInput = {
   price: number;
 };
 
+type CustomerInput = {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  postalCode?: string;
+  city?: string;
+  country?: string;
+};
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -47,12 +58,22 @@ export async function POST(request: Request) {
       );
     }
 
+    const customer: CustomerInput = body.customer ?? {};
+
     const order = await prisma.order.create({
       data: {
         userId: session?.user?.id ?? undefined,
         total: Number(body.total ?? 0),
         status: stripe ? "en attente" : "payée",
         shippingMode: body.shippingMode ?? "livraison",
+        customerFirstName: customer.firstName ?? null,
+customerLastName: customer.lastName ?? null,
+customerEmail: customer.email ?? null,
+customerPhone: customer.phone ?? null,
+address: customer.address ?? null,
+postalCode: customer.postalCode ?? null,
+city: customer.city ?? null,
+country: customer.country ?? null,
         items: {
           create: items.map((item) => ({
             productId: item.id,

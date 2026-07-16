@@ -21,6 +21,14 @@ type OrderRecord = {
   createdAt: string;
   items: OrderItem[];
   user: { name: string | null; email: string } | null;
+  customerFirstName: string | null;
+customerLastName: string | null;
+customerEmail: string | null;
+customerPhone: string | null;
+address: string | null;
+postalCode: string | null;
+city: string | null;
+country: string | null;
 };
 
 const STATUSES = ["en attente", "payée", "expédiée", "livrée", "annulée"] as const;
@@ -207,6 +215,28 @@ export default function AdminOrdersPage() {
                 </div>
               </div>
 
+              {order.shippingMode === "livraison" && (order.address || order.customerPhone) && (
+  <div className="mt-4 rounded-2xl border border-[#e5d1ab] bg-[#fffaf3] p-4 text-sm text-[#43352f]">
+    <p className="text-xs font-medium uppercase tracking-[0.2em] text-[#8b6a4b]">
+      Adresse de livraison
+    </p>
+    <p className="mt-2">
+      {order.customerFirstName || order.customerLastName
+        ? `${order.customerFirstName ?? ""} ${order.customerLastName ?? ""}`.trim()
+        : order.user?.name || "Client"}
+    </p>
+    {order.address && <p>{order.address}</p>}
+    {(order.postalCode || order.city) && (
+      <p>
+        {order.postalCode} {order.city}
+      </p>
+    )}
+    {order.country && <p>{order.country}</p>}
+    {order.customerPhone && (
+      <p className="mt-1 text-[#8b7364]">Tél : {order.customerPhone}</p>
+    )}
+  </div>
+)}
               <div className="mt-4 space-y-1 rounded-2xl bg-[#fffaf3] p-4 text-sm text-[#43352f]">
                 {order.items.map((item) => (
                   <div key={item.id} className="flex items-center justify-between">

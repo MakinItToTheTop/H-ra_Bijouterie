@@ -41,6 +41,36 @@ const statusStyles: Record<string, string> = {
   annulée: "bg-[#fbe4e4] text-[#a13d3d]",
 };
 
+const URGENCY_COLORS: Record<"red" | "orange" | "green", string> = {
+  red: "bg-[#c1443d]",
+  orange: "bg-[#d98a2b]",
+  green: "bg-[#4f8c3f]",
+};
+
+function getElapsedHours(order: OrderRecord): number {
+  return (Date.now() - new Date(order.createdAt).getTime()) / (1000 * 60 * 60);
+}
+
+function getUrgencyColor(hours: number): "red" | "orange" | "green" {
+  if (hours >= 32) return "red";
+  if (hours >= 16) return "orange";
+  return "green";
+}
+
+// 0 = livraison payée (toujours en tête), 1 = retrait payée (triée par urgence),
+// 2 = tout le reste (ordre chronologique inchangé)
+function getFulfillmentGroup(order: OrderRecord): number {
+  if (order.status !== "payée") return 2;
+  return order.shippingMode === "livraison" ? 0 : 1;
+}
+
+function orderPriorityComparator(a: OrderRecord, b: OrderRecord): number {
+  const groupDiff = getFulfillmentGroup(a) - getFulfillmentGroup(b);
+  if (groupDiff !== 0) return groupDiff;
+  if (getFulfillmentGroup(a) === 2) return 0; // garde l'ordre existant
+  return getElapsedHours(b) - getElapsedHours(a); // plus ancien/urgent en premier
+}
+
 export default function AdminOrdersPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -115,7 +145,10 @@ export default function AdminOrdersPage() {
     return null;
   }
 
-  const filtered = orders.filter((o) => filter === "tous" || o.status === filter);
+  const filtered = orders
+  .filter((o) => filter === "tous" || o.status === filter)
+  .slice()
+  .sort(orderPriorityComparator);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-14 lg:px-6">
@@ -189,6 +222,20 @@ export default function AdminOrdersPage() {
                 </div>
 
                 <div className="flex flex-col items-end gap-2">
+                    {order.status === "payée" && (
+  <span className="flex items-center gap-1.5 text-xs text-ink-soft">
+    <span
+      className={`h-2.5 w-2.5 rounded-full ${URGENCY_COLORS[getUrgencyColor(getElapsedHours(order))]}`}
+    />
+    {order.shippingMode === "livraison"
+      ? "À expédier"
+      : getUrgencyColor(getElapsedHours(order)) === "red"
+      ? "Urgent"
+      : getUrgencyColor(getElapsedHours(order)) === "orange"
+      ? "À préparer"
+      : "Récent"}
+  </span>
+)}
                   <span className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${statusStyles[order.status] ?? "bg-[#fffaf3] text-ink-soft"}`}>
                     {order.status}
                   </span>

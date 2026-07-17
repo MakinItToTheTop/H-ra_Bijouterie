@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Resend } from "resend"; 
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
@@ -85,6 +86,40 @@ country: customer.country ?? null,
       },
       include: { items: true },
     });
+
+    // Accusé de réception — best effort, ne bloque pas la commande si l'email échoue.
+    const resendApiKey = process.env.RESEND_API_KEY;
+    if (resendApiKey && customer.email) {
+      try {
+        const resend = new Resend(resendApiKey);
+        const orderNumber = order.id.slice(-8).toUpperCase();
+        const itemsList = items
+          .map((item) => `- ${item.quantity}x ${item.name} (${item.price.toFixed(2)} €)`)
+          .join("\n");
+
+        await resend.emails.send({
+          from: process.env.CONTACT_FROM_EMAIL ?? "Héra Bijouterie <onboarding@resend.dev>",
+          to: customer.email,
+          subject: `Confirmation de votre commande #${orderNumber}`,
+          text: [
+            `Bonjour ${customer.firstName ?? ""},`,
+            "",
+            `Nous avons bien reçu votre commande #${orderNumber}.`,
+            "",
+            itemsList,
+            "",
+            `Total : ${order.total.toFixed(2)} €`,
+            `Mode : ${order.shippingMode === "retrait" ? "Retrait en boutique" : "Livraison à domicile"}`,
+            "",
+            "Nous reviendrons vers vous dès que votre commande sera validée.",
+            "",
+            "Héra Bijouterie",
+          ].join("\n"),
+        });
+      } catch (emailError) {
+        console.error("Order confirmation email error", emailError);
+      }
+    }
 
     return NextResponse.json({
       ok: true,

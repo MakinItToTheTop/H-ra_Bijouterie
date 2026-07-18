@@ -111,8 +111,8 @@ country: customer.country ?? null,
   `Total : ${order.total.toFixed(2)} €`,
   `Mode : ${order.shippingMode === "retrait" ? "Retrait en boutique" : "Livraison à domicile"}`,
   order.shippingMode === "retrait"
-    ? "Votre commande sera disponible en boutique sous 24h ouvrées."
-    : "Votre commande sera livrée sous 2 à 4 jours ouvrés.",
+  ? "Vous pourrez récupérer votre commande en boutique à partir de 48 heures après validation du paiement."
+  : "Votre commande vous sera livrée sous 7 jours.",
   "",
   "Nous reviendrons vers vous dès que votre commande sera validée.",
   "",

@@ -26,6 +26,7 @@ const statusLabels: Record<string, string> = {
   payée: "Payée",
   expédiée: "Expédiée",
   livrée: "Livrée",
+  "prête à récupérer": "Prête à récupérer",
   annulée: "Annulée",
 };
 

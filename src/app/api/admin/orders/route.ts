@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
 
-const VALID_STATUSES = ["en attente", "payée", "expédiée", "livrée", "annulée"];
+const VALID_STATUSES = ["en attente", "payée", "expédiée", "prête à récupérer", "livrée", "annulée"];
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions);
@@ -59,7 +59,7 @@ export async function PATCH(request: Request) {
 
     // Le stock ne doit être décrémenté qu'une seule fois : au moment précis où
     // la commande BASCULE vers "payée" (pas si elle l'était déjà).
-    const justPaid = status === "payée" && existing.status !== "payée";
+    const justPaid = status === "payée" && existing.status === "en attente";
 
     const updated = await prisma.$transaction(async (tx) => {
       if (justPaid) {
@@ -111,12 +111,15 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ ok: false, message: "Commande introuvable." }, { status: 404 });
     }
 
-    if (order.status !== "livrée") {
-      return NextResponse.json(
-        { ok: false, message: "Seules les commandes livrées peuvent être supprimées." },
-        { status: 400 }
-      );
-    }
+    const isDeletable =
+  order.status === "livrée" || (order.shippingMode === "retrait" && order.status === "prête à récupérer");
+
+if (!isDeletable) {
+  return NextResponse.json(
+    { ok: false, message: "Seules les commandes livrées (ou prêtes à récupérer pour un retrait) peuvent être supprimées." },
+    { status: 400 }
+  );
+}
 
     await prisma.order.delete({ where: { id } });
 

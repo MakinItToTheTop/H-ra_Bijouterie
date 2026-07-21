@@ -31,12 +31,18 @@ type OrderRecord = {
   country: string | null;
 };
 
-const STATUSES = ["en attente", "payée", "expédiée", "livrée", "annulée"] as const;
+// Statuts affichés dans les filtres en haut de page (union livraison + retrait).
+const STATUSES = ["en attente", "payée", "expédiée", "prête à récupérer", "livrée", "annulée"] as const;
+
+// Statuts proposés dans le menu déroulant de chaque commande, selon le mode de livraison.
+const DELIVERY_STATUSES = ["en attente", "payée", "expédiée", "livrée", "annulée"] as const;
+const PICKUP_STATUSES = ["payée", "prête à récupérer", "annulée"] as const;
 
 const statusStyles: Record<string, string> = {
   "en attente": "bg-[#fdf1de] text-[#8b6a4b]",
   payée: "bg-[#e7f3e3] text-[#3f6b34]",
   expédiée: "bg-[#e3ecf7] text-[#33578f]",
+  "prête à récupérer": "bg-[#e3ecf7] text-[#33578f]",
   livrée: "bg-[#f4e7c9] text-[#7a5d41]",
   annulée: "bg-[#fbe4e4] text-[#a13d3d]",
 };
@@ -300,13 +306,20 @@ function OrderCard({
             onChange={(event) => updateStatus(order, event.target.value)}
             className="rounded-full border border-line bg-white px-3 py-1.5 text-xs text-ink-soft outline-none focus:border-gold"
           >
-            {STATUSES.map((option) => (
+            {/* "en attente" n'est pas un choix manuel pour le retrait (statut
+                initial avant paiement) : on ne l'affiche que si la commande
+                s'y trouve déjà, pour ne pas la laisser bloquée sans option. */}
+            {order.shippingMode === "retrait" && order.status === "en attente" && (
+              <option value="en attente">en attente</option>
+            )}
+            {(order.shippingMode === "retrait" ? PICKUP_STATUSES : DELIVERY_STATUSES).map((option) => (
               <option key={option} value={option}>
                 {option}
               </option>
             ))}
           </select>
-          {order.status === "livrée" && (
+          {((order.shippingMode === "retrait" && order.status === "prête à récupérer") ||
+            (order.shippingMode !== "retrait" && order.status === "livrée")) && (
             <button
               type="button"
               onClick={() => deleteOrder(order)}

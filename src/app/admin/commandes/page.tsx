@@ -35,7 +35,7 @@ type OrderRecord = {
 const STATUSES = ["en attente", "payée", "expédiée", "prête à récupérer", "livrée", "annulée"] as const;
 
 // Statuts proposés dans le menu déroulant de chaque commande, selon le mode de livraison.
-const DELIVERY_STATUSES = ["en attente", "payée", "expédiée", "livrée", "annulée"] as const;
+const DELIVERY_STATUSES = ["payée", "expédiée", "livrée", "annulée"] as const;
 const PICKUP_STATUSES = ["payée", "prête à récupérer", "annulée"] as const;
 
 const statusStyles: Record<string, string> = {
@@ -309,9 +309,7 @@ function OrderCard({
             {/* "en attente" n'est pas un choix manuel pour le retrait (statut
                 initial avant paiement) : on ne l'affiche que si la commande
                 s'y trouve déjà, pour ne pas la laisser bloquée sans option. */}
-            {order.shippingMode === "retrait" && order.status === "en attente" && (
-              <option value="en attente">en attente</option>
-            )}
+            {order.status === "en attente" && <option value="en attente">en attente</option>}
             {(order.shippingMode === "retrait" ? PICKUP_STATUSES : DELIVERY_STATUSES).map((option) => (
               <option key={option} value={option}>
                 {option}

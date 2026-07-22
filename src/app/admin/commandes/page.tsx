@@ -254,6 +254,27 @@ function OrderCard({
   updateStatus: (order: OrderRecord, newStatus: string) => void;
   deleteOrder: (order: OrderRecord) => void;
 }) {
+    const [notifyState, setNotifyState] = useState<"idle" | "sending" | "sent">("idle");
+
+const notifyReady = async () => {
+  setNotifyState("sending");
+
+  const response = await fetch("/api/admin/orders/notify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id: order.id }),
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok || !data?.ok) {
+    setNotifyState("idle");
+    alert(data?.message || "L'email n'a pas pu être envoyé.");
+    return;
+  }
+
+  setNotifyState("sent");
+};
   return (
     <div className="rounded-[24px] border border-line bg-white p-6 shadow-[var(--shadow-soft)]">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -316,6 +337,20 @@ function OrderCard({
               </option>
             ))}
           </select>
+          {order.shippingMode === "retrait" && order.status === "prête à récupérer" && (
+  <button
+    type="button"
+    onClick={notifyReady}
+    disabled={notifyState === "sending" || notifyState === "sent"}
+    className="text-xs font-medium text-[#33578f] hover:underline disabled:cursor-default disabled:text-ink-soft disabled:no-underline"
+  >
+    {notifyState === "sending"
+      ? "Envoi…"
+      : notifyState === "sent"
+      ? "Email envoyé ✓"
+      : "Prévenir le client par email"}
+  </button>
+)}
           {((order.shippingMode === "retrait" && order.status === "prête à récupérer") ||
             (order.shippingMode !== "retrait" && order.status === "livrée")) && (
             <button

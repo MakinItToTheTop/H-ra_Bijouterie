@@ -83,7 +83,7 @@ export function CustomCursor() {
       <div
         ref={ringRef}
         aria-hidden
-        className="pointer-events-none fixed left-0 top-0 z-[999] rounded-full border transition-[width,height,opacity,border-color] duration-300 ease-out"
+        className="pointer-events-none fixed left-0 top-0 z-[1000] rounded-full border transition-[width,height,opacity,border-color] duration-300 ease-out"
         style={{
           width: isPointer ? 52 : 34,
           height: isPointer ? 52 : 34,
@@ -96,7 +96,7 @@ export function CustomCursor() {
       <div
         ref={dotRef}
         aria-hidden
-        className="pointer-events-none fixed left-0 top-0 z-[999] rounded-full bg-[#c19a5b] transition-[width,height,opacity] duration-200 ease-out"
+        className="pointer-events-none fixed left-0 top-0 z-[1000] rounded-full bg-[#c19a5b] transition-[width,height,opacity] duration-200 ease-out"
         style={{
           width: isPressed ? 6 : 8,
           height: isPressed ? 6 : 8,

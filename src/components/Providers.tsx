@@ -5,6 +5,7 @@ import { CartProvider } from "@/context/CartContext";
 import { ToastProvider } from "@/components/Toast";
 import { CustomCursor } from "@/components/CustomCursor";
 import { ClickBurst } from "@/components/ClickBurst";
+import { JewelAdvisor } from "@/components/JewelAdvisor";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -13,6 +14,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <CartProvider>
           <CustomCursor />
           <ClickBurst />
+          <JewelAdvisor />
           {children}
         </CartProvider>
       </ToastProvider>

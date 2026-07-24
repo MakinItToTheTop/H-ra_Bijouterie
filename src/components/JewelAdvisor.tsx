@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { MessageCircle, X } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useProducts, type Product as ProductRow } from "@/hooks/useProducts";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/components/Toast";
@@ -50,6 +51,8 @@ function matchProducts(products: ProductRow[], answers: Answers) {
 // guidé (questions à choix rapides) pour orienter vers un bijou du catalogue
 // déjà chargé via useProducts — aucune route serveur supplémentaire.
 export function JewelAdvisor() {
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.role === "admin";
   const [open, setOpen] = useState(false);
   const [position, setPosition] = useState({ x: 24, y: 24 });
   const velocity = useRef({ x: 1.1, y: 0.9 });
@@ -97,6 +100,13 @@ export function JewelAdvisor() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+
+  // Ferme le panneau si un admin se connecte pendant que le chat est ouvert.
+  useEffect(() => {
+    if (isAdmin) setOpen(false);
+  }, [isAdmin]);
+
+  if (isAdmin) return null;
 
   return (
     <>

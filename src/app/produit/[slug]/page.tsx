@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Check, Star } from "lucide-react";
+import { ArrowLeft, Check } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductDetail } from "@/components/ProductDetail";
+import { ProductReviews } from "@/components/ProductReviews";
 import { Reveal } from "@/components/Reveal";
 import { toProduct } from "@/data/products";
 import { prisma } from "@/lib/prisma";
@@ -95,21 +96,7 @@ export default async function ProductPage({ params }: PageProps) {
           <div className="h-full rounded-[28px] border border-line bg-[#fffaf3] p-7 md:p-8">
             <h2 className="font-display text-3xl text-[#231711]">Avis clients</h2>
             <div className="rule-gold my-5" />
-            <div className="space-y-6">
-              {[
-                "Magnifique qualité, très beau cadeau et conseil parfait.",
-                "Je recommande vivement pour ses créations raffinées.",
-              ].map((review) => (
-                <figure key={review}>
-                  <div className="flex items-center gap-1 text-gold">
-                    {Array.from({ length: 5 }).map((_, index) => (
-                      <Star key={index} className="h-4 w-4 fill-current" />
-                    ))}
-                  </div>
-                  <blockquote className="mt-3 leading-7 text-ink-soft">“{review}”</blockquote>
-                </figure>
-              ))}
-            </div>
+            <ProductReviews productId={product.id} />
           </div>
         </Reveal>
       </div>

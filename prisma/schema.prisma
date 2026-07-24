@@ -20,6 +20,7 @@ model User {
   accounts      Account[]
   orders        Order[]
   wishlist      WishlistItem[]
+  reviews       Review[]
 }
 
 model Account {
@@ -62,6 +63,7 @@ model Product {
   color           String?
   createdAt       DateTime    @default(now())
   orderItems      OrderItem[]
+  productReviews  Review[]
 }
 
 model Order {
@@ -104,6 +106,20 @@ model WishlistItem {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, productId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  productId String
+  userId    String
+  rating    Int
+  comment   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, userId]) // un seul avis par client et par produit
 }
 
 model ContactRequest {

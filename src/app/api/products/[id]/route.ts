@@ -85,7 +85,35 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    await prisma.product.delete({ where: { id } });
+
+    // Un produit ne peut être supprimé s'il apparaît dans une commande "vivante"
+    // (pas encore annulée) : on garde l'historique de ces commandes intact.
+    // S'il n'est référencé que par des commandes annulées, ces lignes de
+    // commande n'ont plus d'intérêt à être conservées et sont supprimées avec
+    // le produit.
+    const blockingItems = await prisma.orderItem.count({
+      where: {
+        productId: id,
+        order: { status: { not: "annulée" } },
+      },
+    });
+
+    if (blockingItems > 0) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message:
+            "Impossible de supprimer : ce produit est présent dans une ou plusieurs commandes non annulées.",
+        },
+        { status: 409 },
+      );
+    }
+
+    await prisma.$transaction([
+      prisma.orderItem.deleteMany({ where: { productId: id, order: { status: "annulée" } } }),
+      prisma.product.delete({ where: { id } }),
+    ]);
+
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error(error);

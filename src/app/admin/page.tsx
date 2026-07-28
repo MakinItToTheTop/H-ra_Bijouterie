@@ -72,6 +72,8 @@ export default function AdminPage() {
   const [metalPrices, setMetalPrices] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [imageSource, setImageSource] = useState<"url" | "file">("url");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Check authentication and admin role
@@ -138,8 +140,34 @@ export default function AdminPage() {
     setForm((current) => ({ ...current, [key]: value }));
   };
 
+  const handleImageFileChange = async (file: File | undefined) => {
+  if (!file) return;
+
+  setIsUploadingImage(true);
+  try {
+    const body = new FormData();
+    body.append("file", file);
+
+    const response = await fetch("/api/admin/upload", { method: "POST", body });
+    const data = await response.json();
+
+    if (!data.ok) {
+      alert(data.message || "Échec de l'envoi de l'image.");
+      return;
+    }
+
+    updateForm("image", data.url);
+  } catch (error) {
+    console.error(error);
+    alert("Échec de l'envoi de l'image.");
+  } finally {
+    setIsUploadingImage(false);
+  }
+};
+
   const resetForm = () => {
     setForm(defaultForm);
+    setImageSource("url");
     setIsFormOpen(false);
   };
 
@@ -408,14 +436,55 @@ export default function AdminPage() {
                 {/* Right Column */}
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium text-[#2a1f1b]">URL Image</label>
-                    <input
-                      value={form.image}
-                      onChange={(e) => updateForm("image", e.target.value)}
-                      className="w-full rounded-lg border border-[#e5d1ab] bg-[#fffdfb] px-4 py-2 text-sm outline-none focus:border-[#b88a44]"
-                      placeholder="https://..."
-                    />
-                  </div>
+  <label className="text-sm font-medium text-[#2a1f1b]">Image du produit</label>
+  <div className="mt-1.5 mb-2 inline-flex rounded-lg border border-[#e5d1ab] bg-[#fffdfb] p-0.5 text-xs">
+    <button
+      type="button"
+      onClick={() => setImageSource("url")}
+      className={`rounded-md px-3 py-1.5 font-medium transition ${
+        imageSource === "url" ? "bg-[#b88a44] text-white" : "text-[#8b6a4b] hover:text-[#2a1f1b]"
+      }`}
+    >
+      URL
+    </button>
+    <button
+      type="button"
+      onClick={() => setImageSource("file")}
+      className={`rounded-md px-3 py-1.5 font-medium transition ${
+        imageSource === "file" ? "bg-[#b88a44] text-white" : "text-[#8b6a4b] hover:text-[#2a1f1b]"
+      }`}
+    >
+      Depuis mon ordinateur
+    </button>
+  </div>
+
+  {imageSource === "url" ? (
+    <input
+      value={form.image}
+      onChange={(e) => updateForm("image", e.target.value)}
+      className="w-full rounded-lg border border-[#e5d1ab] bg-[#fffdfb] px-4 py-2 text-sm outline-none focus:border-[#b88a44]"
+      placeholder="https://..."
+    />
+  ) : (
+    <input
+      type="file"
+      accept="image/png,image/jpeg,image/webp,image/gif"
+      onChange={(e) => handleImageFileChange(e.target.files?.[0])}
+      disabled={isUploadingImage}
+      className="w-full rounded-lg border border-[#e5d1ab] bg-[#fffdfb] px-4 py-2 text-sm outline-none file:mr-3 file:rounded-md file:border-0 file:bg-[#f4e7c9] file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-[#7a5b39] disabled:opacity-60"
+    />
+  )}
+
+  {isUploadingImage && <p className="mt-1.5 text-xs text-[#8b6a4b]">Envoi de l&apos;image…</p>}
+
+  {form.image && (
+    <img
+      src={form.image}
+      alt="Aperçu"
+      className="mt-3 h-24 w-24 rounded-lg border border-[#e5d1ab] object-cover"
+    />
+  )}
+</div>
 
                   <div>
                     <label className="text-sm font-medium text-[#2a1f1b]">Stock</label>
@@ -485,7 +554,7 @@ export default function AdminPage() {
               <div className="mt-6 flex gap-3">
                 <button
                   onClick={submitProduct}
-                  disabled={isLoading}
+                  disabled={isLoading || isUploadingImage}
                   className="flex-1 rounded-full bg-[#b88a44] px-6 py-3 text-sm font-medium text-white hover:bg-[#a67a34] disabled:opacity-50"
                 >
                   {isLoading ? "Enregistrement..." : "Enregistrer"}

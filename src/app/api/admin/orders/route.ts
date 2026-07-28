@@ -112,11 +112,13 @@ export async function DELETE(request: Request) {
     }
 
     const isDeletable =
-  order.status === "livrée" || (order.shippingMode === "retrait" && order.status === "prête à récupérer");
+  order.status === "livrée" ||
+  order.status === "annulée" ||
+  (order.shippingMode === "retrait" && order.status === "prête à récupérer");
 
 if (!isDeletable) {
   return NextResponse.json(
-    { ok: false, message: "Seules les commandes livrées (ou prêtes à récupérer pour un retrait) peuvent être supprimées." },
+    { ok: false, message: "Seules les commandes livrées, annulées (ou prêtes à récupérer pour un retrait) peuvent être supprimées." },
     { status: 400 }
   );
 }

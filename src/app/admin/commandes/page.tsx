@@ -352,15 +352,16 @@ const notifyReady = async () => {
   </button>
 )}
           {((order.shippingMode === "retrait" && order.status === "prête à récupérer") ||
-            (order.shippingMode !== "retrait" && order.status === "livrée")) && (
-            <button
-              type="button"
-              onClick={() => deleteOrder(order)}
-              className="text-xs font-medium text-[#a13d3d] hover:underline"
-            >
-              Supprimer
-            </button>
-          )}
+  (order.shippingMode !== "retrait" && order.status === "livrée") ||
+  order.status === "annulée") && (
+  <button
+    type="button"
+    onClick={() => deleteOrder(order)}
+    className="text-xs font-medium text-[#a13d3d] hover:underline"
+  >
+    Supprimer
+  </button>
+)}
         </div>
       </div>
 

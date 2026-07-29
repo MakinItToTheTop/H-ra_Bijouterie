@@ -1,7 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Minus, Plus, ShieldCheck, ShoppingBag, Trash2, Truck } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowRight,
+  Minus,
+  Plus,
+  ShieldCheck,
+  ShoppingBag,
+  Trash2,
+  Truck,
+} from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import {
   FREE_SHIPPING_THRESHOLD,
@@ -11,7 +20,7 @@ import {
 } from "@/lib/format";
 
 export default function PanierPage() {
-  const { items, subtotal, updateQuantity, removeItem, hydrated } = useCart();
+  const { items, subtotal, updateQuantity, removeItem, hydrated, stockAdjustedIds } = useCart();
 
   const shipping = subtotal >= FREE_SHIPPING_THRESHOLD || subtotal === 0 ? 0 : SHIPPING_FEE;
   const total = subtotal + shipping;
@@ -37,6 +46,20 @@ export default function PanierPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-14 lg:px-6">
+      {stockAdjustedIds.length > 0 && (
+        <div
+          className="mb-6 flex items-start gap-3 rounded-2xl border border-[#e8b4a0] bg-[#fff4f0] p-4 text-sm text-[#8a4a3a]"
+          style={{ animation: "var(--animate-fade-up)" }}
+        >
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+          <p>
+            Le stock de certains articles a changé depuis leur ajout au panier : les
+            quantités ont été ajustées, ou l’article a été retiré s’il n’était plus
+            disponible.
+          </p>
+        </div>
+      )}
+
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-[11px] uppercase tracking-[0.3em] text-[#8b6a4b]">Panier</p>

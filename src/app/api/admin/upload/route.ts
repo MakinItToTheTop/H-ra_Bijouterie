@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { writeFile } from "fs/promises";
-import path from "path";
+import { put } from "@vercel/blob";
 import { randomUUID } from "crypto";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -40,12 +39,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, message: "Image trop lourde (5 Mo max)." }, { status: 400 });
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const filename = `${randomUUID()}.${extension}`;
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    await writeFile(path.join(uploadDir, filename), buffer);
+    const filename = `products/${randomUUID()}.${extension}`;
+    const blob = await put(filename, file, {
+      access: "public",
+      contentType: file.type,
+    });
 
-    return NextResponse.json({ ok: true, url: `/uploads/${filename}` });
+    return NextResponse.json({ ok: true, url: blob.url });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ ok: false, message: "Échec de l'envoi de l'image." }, { status: 500 });

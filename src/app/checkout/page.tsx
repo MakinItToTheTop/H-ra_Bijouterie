@@ -16,7 +16,7 @@ import {
 type ShippingMode = "retrait" | "livraison";
 
 function CheckoutPageContent() {
-  const { items, subtotal, clearCart, hydrated } = useCart();
+  const { items, subtotal, clearCart, hydrated, refreshStock } = useCart();
   const { data: session } = useSession();
   const isAdmin = session?.user?.role === "admin";
   const searchParams = useSearchParams();
@@ -46,7 +46,21 @@ function CheckoutPageContent() {
     setStatus("sending");
     setError("");
 
-    const formData = Object.fromEntries(new FormData(event.currentTarget).entries()) as Record<
+    // Dernier contrôle : le panier peut contenir un snapshot de stock vieux
+    // de plusieurs minutes. On revérifie juste avant d'envoyer la commande
+    // pour prévenir l'utilisateur immédiatement plutôt que de le laisser
+    // remplir tout le formulaire pour rien.
+    const adjustedIds = await refreshStock();
+
+    if (adjustedIds.length > 0) {
+      setError(
+        "Le stock de certains articles a changé pendant votre commande. Merci de vérifier votre panier avant de continuer.",
+      );
+      setStatus("idle");
+      return;
+    }
+
+    const formData = Object.fromEntries(new FormData(event.currentTarget).entries()) as Record
       string,
       string
     >;
@@ -143,7 +157,7 @@ function CheckoutPageContent() {
     );
   }
 
-  if (isAdmin) {                                       // ← AJOUTER tout ce bloc
+  if (isAdmin) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-20 text-center lg:px-6">
         <h1 className="font-display text-[clamp(2rem,4vw,2.75rem)] text-[#231711]">

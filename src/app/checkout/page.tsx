@@ -60,10 +60,9 @@ function CheckoutPageContent() {
       return;
     }
 
-    const formData = Object.fromEntries(new FormData(event.currentTarget).entries()) as Record
-      string,
-      string
-    >;
+    const formData = Object.fromEntries(
+  new FormData(event.currentTarget).entries(),
+) as Record<string, string>;
 
     const payload = {
       customer: {

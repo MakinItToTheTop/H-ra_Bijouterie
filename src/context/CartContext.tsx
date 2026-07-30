@@ -6,9 +6,11 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
+import { useSession } from "next-auth/react";
 import type { Product } from "@/data/products";
 
 type CartItem = {
@@ -38,36 +40,66 @@ type CartContextValue = {
 
 const CartContext = createContext<CartContextValue | undefined>(undefined);
 
-const STORAGE_KEY = "hera-cart";
+const STORAGE_PREFIX = "hera-cart";
+
+/** One cart per browser identity: each signed-in user gets their own key,
+ *  and signed-out visitors share a single "guest" cart. This prevents
+ *  Client A's cart from leaking into Client B's session when they share
+ *  a browser (login/logout, or switching accounts). */
+function storageKeyFor(userKey: string | null) {
+  return `${STORAGE_PREFIX}:${userKey ?? "guest"}`;
+}
 
 export function CartProvider({ children }: { children: ReactNode }) {
+  const { data: session, status } = useSession();
   const [items, setItems] = useState<CartItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [stockAdjustedIds, setStockAdjustedIds] = useState<string[]>([]);
 
+  // `status` is "loading" until NextAuth has resolved the session from the
+  // cookie/token. We wait for that before picking a storage key, otherwise
+  // we'd briefly read the "guest" cart and then swap to the user's cart
+  // (or vice versa) right after paint.
+  const userKey = session?.user?.email ?? session?.user?.id ?? null;
+  const storageKey = status === "loading" ? null : storageKeyFor(userKey);
+  const previousStorageKey = useRef<string | null>(null);
+
+  // (Re)load the cart from localStorage whenever the active storage key
+  // changes: on first mount, on login, on logout, and when switching
+  // between accounts in the same browser tab.
   useEffect(() => {
+    if (!storageKey) return; // session still resolving
+    if (previousStorageKey.current === storageKey) return; // nothing changed
+
+    previousStorageKey.current = storageKey;
+    setHydrated(false);
+    setStockAdjustedIds([]);
+
     try {
-      const storedCart = localStorage.getItem(STORAGE_KEY);
+      const storedCart = localStorage.getItem(storageKey);
       if (storedCart) {
         const parsed = JSON.parse(storedCart);
-        if (Array.isArray(parsed)) setItems(parsed);
+        setItems(Array.isArray(parsed) ? parsed : []);
+      } else {
+        setItems([]);
       }
     } catch {
       setItems([]);
     } finally {
       setHydrated(true);
     }
-  }, []);
+  }, [storageKey]);
 
   useEffect(() => {
-    // Don't overwrite the stored cart with the empty initial state.
-    if (!hydrated) return;
+    // Don't overwrite the stored cart with the empty initial state, and
+    // don't write until we know which key belongs to the current user.
+    if (!hydrated || !storageKey) return;
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      localStorage.setItem(storageKey, JSON.stringify(items));
     } catch {
       /* quota or private mode — the cart just won't persist */
     }
-  }, [items, hydrated]);
+  }, [items, hydrated, storageKey]);
 
   // Cart items are a snapshot taken at add-to-cart time. If another
   // customer buys the last unit(s) in the meantime, that snapshot goes

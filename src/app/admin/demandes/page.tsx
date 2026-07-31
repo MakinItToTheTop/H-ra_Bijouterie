@@ -12,6 +12,7 @@ type ContactRequestRecord = {
   name: string;
   email: string;
   phone: string | null;
+  orderNumber: string | null;
   message: string;
   status: "nouveau" | "traité";
   createdAt: string;
@@ -150,6 +151,11 @@ export default function AdminContactRequestsPage() {
                         <Phone className="h-3.5 w-3.5" />
                         {item.phone}
                       </a>
+                    )}
+                    {item.orderNumber && (
+                      <span className="rounded-full bg-gold-pale px-3 py-1 text-xs font-medium text-[#6f5230]">
+                        N° commande : {item.orderNumber}
+                      </span>
                     )}
                     <span>
                       {new Date(item.createdAt).toLocaleDateString("fr-FR", {

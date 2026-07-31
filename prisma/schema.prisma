@@ -123,12 +123,13 @@ model Review {
 }
 
 model ContactRequest {
-  id        String   @id @default(cuid())
-  subject   String   @default("Contact")
-  name      String
-  email     String
-  phone     String?
-  message   String
-  status    String   @default("nouveau") // nouveau | traité
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  subject     String   @default("Contact")
+  name        String
+  email       String
+  phone       String?
+  orderNumber String?
+  message     String
+  status      String   @default("nouveau") // nouveau | traité
+  createdAt   DateTime @default(now())
 }

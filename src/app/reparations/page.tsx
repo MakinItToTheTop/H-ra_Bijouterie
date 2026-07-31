@@ -72,6 +72,10 @@ export default function ReparationsPage() {
                 { name: "email", label: "Email", type: "email", required: true },
                 { name: "phone", label: "Téléphone", type: "tel" },
                 {
+                  name: "orderNumber",
+                  label: "Numéro de commande (si applicable)",
+                },
+                {
                   name: "message",
                   label: "Décrivez l’objet et la réparation souhaitée",
                   type: "textarea",

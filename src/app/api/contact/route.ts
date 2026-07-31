@@ -11,6 +11,7 @@ export async function POST(request: Request) {
     const name = typeof body.name === "string" ? body.name.trim() : "";
     const email = typeof body.email === "string" ? body.email.trim() : "";
     const phone = typeof body.phone === "string" ? body.phone.trim() : "";
+    const orderNumber = typeof body.orderNumber === "string" ? body.orderNumber.trim() : "";
     const message = typeof body.message === "string" ? body.message.trim() : "";
     const subject = typeof body.subject === "string" && body.subject ? body.subject : "Contact";
 
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
     // 1. Trace en base — garantit qu'on ne perd jamais la demande même si
     // l'envoi d'email échoue (clé manquante, quota, panne Resend...).
     const saved = await prisma.contactRequest.create({
-      data: { subject, name, email, phone: phone || null, message },
+      data: { subject, name, email, phone: phone || null, orderNumber: orderNumber || null, message },
     });
 
     // 2. Envoi email — best effort. On ne fait pas échouer toute la requête
@@ -45,6 +46,7 @@ export async function POST(request: Request) {
             `Nom : ${name}`,
             `Email : ${email}`,
             phone ? `Téléphone : ${phone}` : null,
+            orderNumber ? `N° de commande : ${orderNumber}` : null,
             "",
             message,
           ]

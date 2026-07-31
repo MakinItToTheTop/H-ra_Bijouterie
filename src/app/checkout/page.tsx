@@ -46,23 +46,9 @@ function CheckoutPageContent() {
     setStatus("sending");
     setError("");
 
-    // Dernier contrôle : le panier peut contenir un snapshot de stock vieux
-    // de plusieurs minutes. On revérifie juste avant d'envoyer la commande
-    // pour prévenir l'utilisateur immédiatement plutôt que de le laisser
-    // remplir tout le formulaire pour rien.
-    const adjustedIds = await refreshStock();
-
-    if (adjustedIds.length > 0) {
-      setError(
-        "Le stock de certains articles a changé pendant votre commande. Merci de vérifier votre panier avant de continuer.",
-      );
-      setStatus("idle");
-      return;
-    }
-
     const formData = Object.fromEntries(
-  new FormData(event.currentTarget).entries(),
-) as Record<string, string>;
+      new FormData(event.currentTarget).entries(),
+    ) as Record<string, string>;
 
     const payload = {
       customer: {
@@ -86,6 +72,22 @@ function CheckoutPageContent() {
     };
 
     try {
+      // Dernier contrôle : le panier peut contenir un snapshot de stock vieux
+      // de plusieurs minutes. On revérifie juste avant d'envoyer la commande
+      // pour prévenir l'utilisateur immédiatement plutôt que de le laisser
+      // remplir tout le formulaire pour rien. Placé DANS le try/catch : si
+      // ça échoue pour une raison quelconque, on retombe proprement sur
+      // l'état "idle" au lieu de rester bloqué sur "Traitement en cours…".
+      const adjustedIds = await refreshStock();
+
+      if (adjustedIds.length > 0) {
+        setError(
+          "Le stock de certains articles a changé pendant votre commande. Merci de vérifier votre panier avant de continuer.",
+        );
+        setStatus("idle");
+        return;
+      }
+
       const orderResponse = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

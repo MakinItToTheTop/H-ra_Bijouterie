@@ -21,6 +21,8 @@ model User {
   orders        Order[]
   wishlist      WishlistItem[]
   reviews       Review[]
+  contactRequests ContactRequest[]   
+  messages      Message[]            
 }
 
 model Account {
@@ -130,6 +132,25 @@ model ContactRequest {
   phone       String?
   orderNumber String?
   message     String
-  status      String   @default("nouveau") // nouveau | traité
+  status      String   @default("nouveau")
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  messages    Message[]
   createdAt   DateTime @default(now())
+}
+
+model Message {
+  id               String         @id @default(cuid())
+  contactRequestId String
+  contactRequest   ContactRequest @relation(fields: [contactRequestId], references: [id], onDelete: Cascade)
+  userId           String?
+  user             User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  senderRole       String
+  body             String
+  readByClient     Boolean        @default(false)
+  readByAdmin      Boolean        @default(false)
+  createdAt        DateTime       @default(now())
+
+  @@index([contactRequestId])
+  @@index([userId])
 }

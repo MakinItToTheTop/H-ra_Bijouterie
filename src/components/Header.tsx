@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Menu, Search, ShoppingBag, User, X } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { Mail, Menu, Search, ShoppingBag, User, X } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { SearchOverlay } from "@/components/SearchOverlay";
 
@@ -18,12 +19,42 @@ const navItems = [
 
 export function Header() {
   const { itemCount } = useCart();
+  const { data: session } = useSession();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [bump, setBump] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const previousCount = useRef(itemCount);
+
+  // Icône messagerie réservée aux clients connectés (pas les admins, qui ont leur propre page demandes).
+  const isConnectedCustomer = Boolean(session?.user) && session?.user?.role !== "admin";
+
+  // Compteur de messages non lus, rafraîchi périodiquement et à chaque navigation.
+  useEffect(() => {
+    if (!isConnectedCustomer) {
+      setUnreadCount(0);
+      return;
+    }
+
+    let cancelled = false;
+    const fetchUnread = () => {
+      fetch("/api/messages/unread-count")
+        .then((res) => res.json())
+        .then((data) => {
+          if (!cancelled && data.ok) setUnreadCount(data.count);
+        })
+        .catch(() => {});
+    };
+
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 30000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [isConnectedCustomer, pathname]);
 
   // Condense the bar once the page scrolls.
   useEffect(() => {
@@ -77,7 +108,7 @@ export function Header() {
 
   return (
     <>
-      <a
+      
         href="#contenu"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[110] focus:rounded-full focus:bg-espresso focus:px-4 focus:py-2 focus:text-sm focus:text-white"
       >
@@ -136,6 +167,21 @@ export function Header() {
             >
               <Search className="h-4 w-4" />
             </button>
+
+            {isConnectedCustomer && (
+              <Link
+                href="/compte/messages"
+                aria-label={`Messagerie${unreadCount > 0 ? `, ${unreadCount} message${unreadCount > 1 ? "s" : ""} non lu${unreadCount > 1 ? "s" : ""}` : ""}`}
+                className="press relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#dfcda8] text-espresso hover:border-gold hover:bg-white/70"
+              >
+                <Mail className="h-4 w-4" />
+                {unreadCount > 0 && (
+                  <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-gold px-1 text-[10px] font-semibold text-white ring-2 ring-cream">
+                    {unreadCount}
+                  </span>
+                )}
+              </Link>
+            )}
 
             <Link
               href="/compte"

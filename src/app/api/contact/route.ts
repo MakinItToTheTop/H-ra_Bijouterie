@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
 
 const DESTINATION_EMAIL = "herabijouterie44@gmail.com";
@@ -22,10 +24,28 @@ export async function POST(request: Request) {
       );
     }
 
+    // Si le client est connecté, on rattache la demande à son compte pour
+    // qu'elle apparaisse dans sa boîte de messagerie.
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id ?? null;
+
     // 1. Trace en base — garantit qu'on ne perd jamais la demande même si
     // l'envoi d'email échoue (clé manquante, quota, panne Resend...).
     const saved = await prisma.contactRequest.create({
-      data: { subject, name, email, phone: phone || null, orderNumber: orderNumber || null, message },
+      data: {
+        subject,
+        name,
+        email,
+        phone: phone || null,
+        orderNumber: orderNumber || null,
+        message,
+        userId,
+        // Le message initial du fil de discussion, visible dans la messagerie
+        // du client s'il est connecté.
+        ...(userId
+          ? { messages: { create: { userId, senderRole: "client", body: message, readByAdmin: false, readByClient: true } } }
+          : {}),
+      },
     });
 
     // 2. Envoi email — best effort. On ne fait pas échouer toute la requête

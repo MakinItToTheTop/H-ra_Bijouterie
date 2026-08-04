@@ -19,14 +19,22 @@ export async function GET() {
 
   try {
     const requests = await prisma.contactRequest.findMany({
-  orderBy: { createdAt: "desc" },
-  include: {
-    user: { select: { id: true, name: true, email: true } },
-    _count: { select: { messages: true } },
-  },
-});
-const shaped = requests.map((r) => ({ ...r, isGuest: !r.userId }));
-return NextResponse.json({ ok: true, requests: shaped });
+      orderBy: { createdAt: "desc" },
+      include: {
+        user: { select: { id: true, name: true, email: true } },
+        messages: { orderBy: { createdAt: "asc" } },
+        _count: { select: { messages: true } },
+      },
+    });
+
+    // Marque comme lus côté admin tous les messages clients en attente
+    await prisma.message.updateMany({
+      where: { senderRole: "client", readByAdmin: false },
+      data: { readByAdmin: true },
+    });
+
+    const shaped = requests.map((r) => ({ ...r, isGuest: !r.userId }));
+    return NextResponse.json({ ok: true, requests: shaped });
   } catch (error) {
     console.error("Fetch contact requests error", error);
     return NextResponse.json({ ok: false, requests: [] }, { status: 500 });

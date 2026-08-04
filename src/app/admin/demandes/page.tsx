@@ -6,6 +6,13 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Loader2, Mail, MessageSquareReply, Phone, Send, Trash2, UserCheck, UserX } from "lucide-react";
 
+type MessageRecord = {
+  id: string;
+  senderRole: "client" | "admin";
+  body: string;
+  createdAt: string;
+};
+
 type ContactRequestRecord = {
   id: string;
   subject: string;
@@ -18,6 +25,7 @@ type ContactRequestRecord = {
   createdAt: string;
   isGuest: boolean;
   user: { id: string; name: string | null; email: string } | null;
+  messages: MessageRecord[];
 };
 
 export default function AdminContactRequestsPage() {
@@ -29,6 +37,12 @@ export default function AdminContactRequestsPage() {
   const [replyingId, setReplyingId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
   const [sendingReply, setSendingReply] = useState(false);
+
+  const fetchRequests = async () => {
+    const res = await fetch("/api/admin/contact-requests");
+    const data = await res.json();
+    if (data.ok) setRequests(data.requests);
+  };
 
   useEffect(() => {
     if (status === "loading") return;
@@ -43,12 +57,14 @@ export default function AdminContactRequestsPage() {
       return;
     }
 
-    fetch("/api/admin/contact-requests")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.ok) setRequests(data.requests);
-      })
-      .finally(() => setIsLoading(false));
+    fetchRequests().finally(() => setIsLoading(false));
+
+    // Rafraîchit périodiquement pour récupérer les nouveaux messages des clients
+    const interval = setInterval(() => {
+      fetchRequests();
+    }, 8000);
+
+    return () => clearInterval(interval);
   }, [session, status, router]);
 
   const toggleStatus = async (item: ContactRequestRecord) => {
@@ -70,22 +86,22 @@ export default function AdminContactRequestsPage() {
   };
 
   const deleteRequest = async (item: ContactRequestRecord) => {
-  const confirmed = window.confirm(
-    `Supprimer définitivement la demande de ${item.name} ? Cette action est irréversible.`,
-  );
-  if (!confirmed) return;
+    const confirmed = window.confirm(
+      `Supprimer définitivement la demande de ${item.name} ? Cette action est irréversible.`,
+    );
+    if (!confirmed) return;
 
-  const previous = requests;
-  setRequests((prev) => prev.filter((r) => r.id !== item.id));
+    const previous = requests;
+    setRequests((prev) => prev.filter((r) => r.id !== item.id));
 
-  const response = await fetch(`/api/admin/contact-requests?id=${item.id}`, {
-    method: "DELETE",
-  });
+    const response = await fetch(`/api/admin/contact-requests?id=${item.id}`, {
+      method: "DELETE",
+    });
 
-  if (!response.ok) {
-    setRequests(previous);
-  }
-};
+    if (!response.ok) {
+      setRequests(previous);
+    }
+  };
 
   const sendReply = async (item: ContactRequestRecord) => {
     const text = replyText.trim();
@@ -102,7 +118,17 @@ export default function AdminContactRequestsPage() {
 
       if (!response.ok || !result.ok) throw new Error(result.message);
 
-      setRequests((prev) => prev.map((r) => (r.id === item.id ? { ...r, status: "traité" } : r)));
+      setRequests((prev) =>
+        prev.map((r) =>
+          r.id === item.id
+            ? {
+                ...r,
+                status: "traité",
+                messages: result.message ? [...r.messages, result.message] : r.messages,
+              }
+            : r,
+        ),
+      );
       setReplyingId(null);
       setReplyText("");
     } catch {
@@ -212,43 +238,74 @@ export default function AdminContactRequestsPage() {
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
-  <button
-    type="button"
-    onClick={() => {
-      setReplyingId(replyingId === item.id ? null : item.id);
-      setReplyText("");
-    }}
-    className="inline-flex items-center gap-1.5 rounded-full border border-[#dfcda8] bg-white px-4 py-2 text-xs font-medium uppercase tracking-wide text-espresso transition hover:border-gold"
-  >
-    <MessageSquareReply className="h-3.5 w-3.5" />
-    Répondre
-  </button>
-  <button
-    type="button"
-    onClick={() => toggleStatus(item)}
-    className={`rounded-full px-4 py-2 text-xs font-medium uppercase tracking-wide transition ${
-      item.status === "nouveau"
-        ? "bg-[#231711] text-white hover:bg-[#3a2a20]"
-        : "border border-line bg-[#fffaf3] text-ink-soft hover:border-gold"
-    }`}
-  >
-    {item.status === "nouveau" ? "Marquer comme traité" : "Traité ✓"}
-  </button>
-  {item.status === "traité" && (
-    <button
-      type="button"
-      onClick={() => deleteRequest(item)}
-      title="Supprimer cette demande"
-      className="rounded-full border border-transparent p-2 text-ink-soft transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
-    >
-      <Trash2 className="h-4 w-4" />
-    </button>
-  )}
-</div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setReplyingId(replyingId === item.id ? null : item.id);
+                      setReplyText("");
+                    }}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-[#dfcda8] bg-white px-4 py-2 text-xs font-medium uppercase tracking-wide text-espresso transition hover:border-gold"
+                  >
+                    <MessageSquareReply className="h-3.5 w-3.5" />
+                    Répondre
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => toggleStatus(item)}
+                    className={`rounded-full px-4 py-2 text-xs font-medium uppercase tracking-wide transition ${
+                      item.status === "nouveau"
+                        ? "bg-[#231711] text-white hover:bg-[#3a2a20]"
+                        : "border border-line bg-[#fffaf3] text-ink-soft hover:border-gold"
+                    }`}
+                  >
+                    {item.status === "nouveau" ? "Marquer comme traité" : "Traité ✓"}
+                  </button>
+                  {item.status === "traité" && (
+                    <button
+                      type="button"
+                      onClick={() => deleteRequest(item)}
+                      title="Supprimer cette demande"
+                      className="rounded-full border border-transparent p-2 text-ink-soft transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
               </div>
               <p className="mt-4 whitespace-pre-wrap rounded-2xl bg-[#fffaf3] p-4 text-sm leading-6 text-[#43352f]">
                 {item.message}
               </p>
+
+              {item.messages.length > 0 && (
+                <div className="mt-3 space-y-2 rounded-2xl border border-[#e5d1ab] bg-white p-4">
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-[#8b6a4b]">
+                    Échange ({item.messages.length})
+                  </p>
+                  <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
+                    {item.messages.map((m) => (
+                      <div
+                        key={m.id}
+                        className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-6 ${
+                          m.senderRole === "admin"
+                            ? "ml-auto bg-espresso text-white"
+                            : "bg-[#fffaf3] text-[#43352f]"
+                        }`}
+                      >
+                        <p className="whitespace-pre-wrap">{m.body}</p>
+                        <p className={`mt-1 text-[10px] ${m.senderRole === "admin" ? "text-white/60" : "text-ink-muted"}`}>
+                          {m.senderRole === "admin" ? "Héra Bijouterie" : item.name} ·{" "}
+                          {new Date(m.createdAt).toLocaleDateString("fr-FR", {
+                            day: "2-digit",
+                            month: "short",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {replyingId === item.id && (
                 <div className="mt-4 rounded-2xl border border-[#e5d1ab] bg-white p-4">

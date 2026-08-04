@@ -106,9 +106,14 @@ export function Header() {
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
+  const mailboxLabel =
+    unreadCount > 0
+      ? "Messagerie, " + unreadCount + (unreadCount > 1 ? " messages non lus" : " message non lu")
+      : "Messagerie";
+
   return (
     <>
-      
+      <a
         href="#contenu"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[110] focus:rounded-full focus:bg-espresso focus:px-4 focus:py-2 focus:text-sm focus:text-white"
       >
@@ -171,7 +176,7 @@ export function Header() {
             {isConnectedCustomer && (
               <Link
                 href="/compte/messages"
-                aria-label={`Messagerie${unreadCount > 0 ? `, ${unreadCount} message${unreadCount > 1 ? "s" : ""} non lu${unreadCount > 1 ? "s" : ""}` : ""}`}
+                aria-label={mailboxLabel}
                 className="press relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#dfcda8] text-espresso hover:border-gold hover:bg-white/70"
               >
                 <Mail className="h-4 w-4" />

@@ -37,9 +37,10 @@ export async function POST(request: Request) {
     const isConnected = Boolean(contactRequest.userId);
     let messageSaved = false;
     let emailSent = false;
+    let createdMessage = null;
 
     if (isConnected && contactRequest.userId) {
-      await prisma.message.create({
+      createdMessage = await prisma.message.create({
         data: {
           contactRequestId: contactRequest.id,
           userId: contactRequest.userId,
@@ -81,7 +82,7 @@ export async function POST(request: Request) {
 
     await prisma.contactRequest.update({ where: { id }, data: { status: "traité" } });
 
-    return NextResponse.json({ ok: true, messageSaved, emailSent, isConnected });
+    return NextResponse.json({ ok: true, messageSaved, emailSent, isConnected, message: createdMessage });
   } catch (error) {
     console.error("Admin reply error", error);
     return NextResponse.json({ ok: false, message: "Échec de l'envoi de la réponse." }, { status: 500 });

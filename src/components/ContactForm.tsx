@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import { ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
 
 type Field = {
@@ -32,8 +33,21 @@ export function ContactForm({
   columns?: 1 | 2;
   className?: string;
 }) {
+  const { data: session } = useSession(); 
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [message, setMessage] = useState("");
+
+  if (session?.user?.role === "admin") {
+    return (
+      <div
+        className={`rounded-[26px] border border-[#e5d1ab] bg-[#fffaf3] px-6 py-10 text-center ${className}`}
+      >
+        <p className="text-sm leading-6 text-ink-soft">
+          Le formulaire de contact n&apos;est pas disponible pour les comptes administrateurs.
+        </p>
+      </div>
+    );
+  }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

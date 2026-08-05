@@ -29,6 +29,13 @@ export async function POST(request: Request) {
     const session = await getServerSession(authOptions);
     const userId = session?.user?.id ?? null;
 
+    if (session?.user?.role === "admin") {
+  return NextResponse.json(
+    { ok: false, message: "Les comptes administrateurs ne peuvent pas envoyer de demande de contact." },
+    { status: 403 },
+  );
+}
+
     // 1. Trace en base — garantit qu'on ne perd jamais la demande même si
     // l'envoi d'email échoue (clé manquante, quota, panne Resend...).
     const saved = await prisma.contactRequest.create({

@@ -35,6 +35,30 @@ export async function POST(request: Request) {
     { status: 403 },
   );
 }
+    // Récupère l'IP réelle du client (Vercel transmet ceci via ce header).
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+
+    // Empêche l'ouverture d'un nouveau fil tant qu'un fil est déjà ouvert.
+    const existingOpenRequest = await prisma.contactRequest.findFirst({
+      where: {
+        status: "nouveau",
+        ...(userId
+          ? { userId }
+          : { OR: [{ email }, ...(ip ? [{ ip }] : [])] }),
+      },
+    });
+
+    if (existingOpenRequest) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: userId
+            ? "Vous avez déjà une demande en cours. Consultez votre messagerie pour continuer la conversation."
+            : "Une demande est déjà en cours avec ces coordonnées. Nous vous répondrons rapidement, merci de ne pas en renvoyer une nouvelle.",
+        },
+        { status: 409 },
+      );
+    }
 
     // 1. Trace en base — garantit qu'on ne perd jamais la demande même si
     // l'envoi d'email échoue (clé manquante, quota, panne Resend...).
@@ -47,6 +71,7 @@ export async function POST(request: Request) {
         orderNumber: orderNumber || null,
         message,
         userId,
+        ip,
         // Le message initial du fil de discussion, visible dans la messagerie
         // du client s'il est connecté.
         ...(userId

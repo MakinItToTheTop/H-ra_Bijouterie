@@ -1,0 +1,55 @@
+[33m1522a51[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{0}: pull: Fast-forward
+[33m4a66dab[m HEAD@{1}: reset: moving to HEAD~1
+[33m6617487[m HEAD@{2}: reset: moving to HEAD~1
+[33m1522a51[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{3}: commit: ok
+[33m6617487[m HEAD@{4}: commit: correction réception (encore)
+[33m4a66dab[m HEAD@{5}: commit: bug réception corrigé
+[33mfd69d64[m HEAD@{6}: commit: bug admin auto-envoi demande
+[33m2cfc5fb[m HEAD@{7}: commit: bug côté admin
+[33me8722df[m HEAD@{8}: commit: messagerie
+[33me06c55e[m HEAD@{9}: commit: boîte de messagerie
+[33m6c2c2d3[m HEAD@{10}: commit: ajout du numéro de commande en formulaire de réparation
+[33mb8be60c[m HEAD@{11}: commit: bug checkout corrigé
+[33m56cfbcd[m HEAD@{12}: commit: bug localStorage corrigé
+[33m98091e5[m HEAD@{13}: commit: un autre bug ;(
+[33m4547ba6[m HEAD@{14}: commit: bug visuel hors stock
+[33m671ac2d[m HEAD@{15}: commit: upload image
+[33m56ab77d[m HEAD@{16}: commit: mettre des images depuis l'ordi
+[33m4b2ce39[m HEAD@{17}: commit: correction bug bizarre
+[33m4dd1ef8[m HEAD@{18}: commit: possibilité de suppression des produits annulés
+[33mfbc2c38[m HEAD@{19}: commit: suppression du chatbot pour l'admin
+[33m63fcc69[m HEAD@{20}: commit: système d'avis client
+[33m6434434[m HEAD@{21}: commit: correction bug souris en arrière plan
+[33md626adb[m HEAD@{22}: commit: ajout d'un mini chatbot interactif
+[33m01990b1[m HEAD@{23}: commit: déco effet explosion
+[33m5fb02f5[m HEAD@{24}: commit: envoi d'un mail prêt à être récupérer
+[33m309db07[m HEAD@{25}: commit: suppression de l'état attente - inutile
+[33m700b046[m HEAD@{26}: commit: modification des états
+[33md95ca6e[m HEAD@{27}: commit: séparation des livraisons à domicile et retraits
+[33mbc48cb9[m HEAD@{28}: commit: modification de l'accusé
+[33ma492b9c[m HEAD@{29}: commit: gestion de priorité des commandes
+[33mdd1763f[m HEAD@{30}: commit: envoi accusé de réception paiement client
+[33m4475e20[m HEAD@{31}: commit: Sécuriser les retraits au magasin
+[33m0ab1f65[m HEAD@{32}: commit: ajout détail résidence client
+[33mf548d64[m HEAD@{33}: commit: suppression de l'état en attente
+[33m6e0ad2d[m HEAD@{34}: commit: restriction commande admin
+[33m81e04ad[m HEAD@{35}: commit: bouton d'annulation d'un produit payé
+[33macc1545[m HEAD@{36}: commit: bug serveur stripe
+[33mcedcf7a[m HEAD@{37}: commit: confirmation du paiement bug
+[33m69de9fc[m HEAD@{38}: commit: Correction bug calcul prix métal
+[33m43427f9[m HEAD@{39}: commit: décrémentation du stock
+[33m338c91a[m HEAD@{40}: commit: ajout de suppression des commandes livrées
+[33m0398e93[m HEAD@{41}: commit: suivi des commandes correction
+[33m620a63f[m HEAD@{42}: commit: suivi des commandes
+[33m4f8f593[m HEAD@{43}: commit: Correction bug historique des commandes
+[33ma4d3835[m HEAD@{44}: commit: même issue que précédent
+[33m0da423f[m HEAD@{45}: commit: changement couleur de texte
+[33m526da0a[m HEAD@{46}: commit: ajout de suppression des demandes traités
+[33md94e7f4[m HEAD@{47}: commit: ajout d'une page de gestion des demandes
+[33m248d8af[m HEAD@{48}: commit: envoi des demandes
+[33m1332ad0[m HEAD@{49}: commit: ajout d'un curseur customisé
+[33me4b6def[m HEAD@{50}: commit: ajout bouton pour éditer les articles en tant qu'admin
+[33m2751579[m HEAD@{51}: commit: ajout de fichiers complémentaires
+[33ma745897[m HEAD@{52}: commit (merge): modif
+[33maea6ba9[m HEAD@{53}: Branch: renamed refs/heads/master to refs/heads/main
+[33maea6ba9[m HEAD@{55}: commit (initial): tweaking

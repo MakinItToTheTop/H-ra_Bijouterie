@@ -33,24 +33,32 @@ export default function MessagesPage() {
   const [reply, setReply] = useState("");
   const [sending, setSending] = useState(false);
 
-  useEffect(() => {
-    if (status === "loading") return;
+  const fetchThreads = async () => {
+  const res = await fetch("/api/messages");
+  const data = await res.json();
+  if (data.ok) {
+    setThreads(data.threads);
+    setActiveId((prev) => prev ?? (data.threads.length > 0 ? data.threads[0].id : null));
+  }
+};
 
-    if (!session?.user) {
-      router.push("/compte");
-      return;
-    }
+useEffect(() => {
+  if (status === "loading") return;
 
-    fetch("/api/messages")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.ok) {
-          setThreads(data.threads);
-          if (data.threads.length > 0) setActiveId(data.threads[0].id);
-        }
-      })
-      .finally(() => setIsLoading(false));
-  }, [session, status, router]);
+  if (!session?.user) {
+    router.push("/compte");
+    return;
+  }
+
+  fetchThreads().finally(() => setIsLoading(false));
+
+  // Rafraîchit périodiquement pour récupérer les réponses de l'admin
+  const interval = setInterval(() => {
+    fetchThreads();
+  }, 8000);
+
+  return () => clearInterval(interval);
+}, [session, status, router]);
 
   const activeThread = useMemo(
     () => threads.find((t) => t.id === activeId) ?? null,

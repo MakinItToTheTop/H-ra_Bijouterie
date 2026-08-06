@@ -133,6 +133,7 @@ model ContactRequest {
   orderNumber String?
   message     String
   status      String   @default("nouveau")
+  ip          String?
   userId      String?
   user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   messages    Message[]

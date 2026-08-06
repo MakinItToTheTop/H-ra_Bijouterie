@@ -68,10 +68,14 @@ export function ContactForm({
 
       setMessage(result.message ?? "Votre demande a bien été envoyée.");
       setStatus("sent");
-    } catch {
-      setMessage("L’envoi a échoué. Merci de nous appeler au 02 51 83 59 19.");
-      setStatus("error");
-    }
+    } catch (err) {
+  setMessage(
+    err instanceof Error && err.message
+      ? err.message
+      : "L'envoi a échoué. Merci de nous appeler au 02 51 83 59 19."
+  );
+  setStatus("error");
+}
   };
 
   if (status === "sent") {

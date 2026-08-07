@@ -80,7 +80,7 @@ export async function POST(request: Request) {
       }
     }
 
-    await prisma.contactRequest.update({ where: { id }, data: { status: "traité" } });
+  
 
     return NextResponse.json({ ok: true, messageSaved, emailSent, isConnected, message: createdMessage });
   } catch (error) {

@@ -65,9 +65,11 @@ useEffect(() => {
     [threads, activeId],
   );
 
+  const isClosed = activeThread.status === "traité";
+
   const sendReply = async () => {
     const text = reply.trim();
-    if (!text || !activeThread || sending) return;
+    if (!text || !activeThread || sending || activeThread.status === "traité") return;
 
     setSending(true);
     try {
@@ -81,12 +83,12 @@ useEffect(() => {
       if (!response.ok || !result.ok) throw new Error(result.message);
 
       setThreads((prev) =>
-        prev.map((t) =>
-          t.id === activeThread.id
-            ? { ...t, status: "nouveau", messages: [...t.messages, result.message] }
-            : t,
-        ),
-      );
+  prev.map((t) =>
+    t.id === activeThread.id
+      ? { ...t, messages: [...t.messages, result.message] }
+      : t,
+  ),
+);
       setReply("");
     } catch {
       toast({ title: "L'envoi a échoué", description: "Merci de réessayer.", tone: "error" });
@@ -181,20 +183,22 @@ useEffect(() => {
               </div>
 
               <div className="mt-2 flex items-end gap-2 border-t border-line pt-4">
+                
                 <textarea
-                  value={reply}
-                  onChange={(e) => setReply(e.target.value)}
-                  placeholder="Écrire un message…"
-                  rows={2}
-                  className="flex-1 resize-none rounded-2xl border border-[#e5d1ab] bg-cream-panel px-4 py-3 text-sm outline-none transition placeholder:text-ink-muted focus:border-gold focus:shadow-[0_0_0_4px_rgba(193,154,91,0.12)]"
-                />
-                <button
-                  type="button"
-                  onClick={sendReply}
-                  disabled={sending || !reply.trim()}
-                  className="press inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-espresso text-white hover:bg-espresso-light disabled:opacity-50"
-                  aria-label="Envoyer"
-                >
+  value={reply}
+  onChange={(e) => setReply(e.target.value)}
+  placeholder={isClosed ? "Cette conversation est close." : "Écrire un message…"}
+  rows={2}
+  disabled={isClosed}
+  className="flex-1 resize-none rounded-2xl border border-[#e5d1ab] bg-cream-panel px-4 py-3 text-sm outline-none transition placeholder:text-ink-muted focus:border-gold focus:shadow-[0_0_0_4px_rgba(193,154,91,0.12)] disabled:opacity-50"
+/>
+<button
+  type="button"
+  onClick={sendReply}
+  disabled={sending || !reply.trim() || isClosed}
+  className="press inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-espresso text-white hover:bg-espresso-light disabled:opacity-50"
+  aria-label="Envoyer"
+>
                   {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 </button>
               </div>

@@ -51,11 +51,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, message: "Fil introuvable." }, { status: 404 });
     }
 
+    if (thread.status === "traité") {                                    // ← AJOUTER ce bloc
+      return NextResponse.json(
+        { ok: false, message: "Cette conversation est marquée comme traitée et ne peut plus recevoir de message." },
+        { status: 403 },
+      );
+    }
+
     const created = await prisma.message.create({
       data: { contactRequestId, userId: session.user.id, senderRole: "client", body: text, readByClient: true, readByAdmin: false },
     });
 
-    await prisma.contactRequest.update({ where: { id: contactRequestId }, data: { status: "nouveau" } });
+    
 
     return NextResponse.json({ ok: true, message: created });
   } catch (error) {

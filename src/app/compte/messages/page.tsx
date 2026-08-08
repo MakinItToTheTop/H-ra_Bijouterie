@@ -60,12 +60,13 @@ useEffect(() => {
   return () => clearInterval(interval);
 }, [session, status, router]);
 
+  
   const activeThread = useMemo(
     () => threads.find((t) => t.id === activeId) ?? null,
     [threads, activeId],
   );
 
-  const isClosed = activeThread.status === "traité";
+  const isClosed = activeThread?.status === "traité";
 
   const sendReply = async () => {
     const text = reply.trim();
@@ -208,4 +209,5 @@ useEffect(() => {
       )}
     </div>
   );
+  
 }

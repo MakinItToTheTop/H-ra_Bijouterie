@@ -110,15 +110,22 @@ export function JewelAdvisor() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label="Ouvrir le conseiller bijoux"
-        className="fixed z-[997] flex h-14 w-14 items-center justify-center rounded-full bg-white text-2xl shadow-[0_8px_24px_rgba(35,23,17,0.25)] ring-1 ring-[#e5d1ab] transition-transform hover:scale-110 max-md:!left-auto max-md:!top-auto max-md:right-4 max-md:bottom-4"
+            <div
+        className="group fixed z-[997]"
         style={{ left: position.x, top: position.y }}
       >
-        <span aria-hidden>🐱</span>
-      </button>
+        <span className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-full bg-espresso px-3 py-1.5 text-xs text-white opacity-0 shadow-md transition-opacity duration-200 group-hover:opacity-100">
+          Clique sur moi !
+        </span>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label="Ouvrir le conseiller bijoux"
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-white text-2xl shadow-[0_8px_24px_rgba(35,23,17,0.25)] ring-1 ring-[#e5d1ab] transition-transform hover:scale-110 max-md:!left-auto max-md:!top-auto max-md:right-4 max-md:bottom-4"
+        >
+          <span aria-hidden>🐱</span>
+        </button>
+      </div>
 
       {open && <AdvisorPanel onClose={() => setOpen(false)} />}
     </>

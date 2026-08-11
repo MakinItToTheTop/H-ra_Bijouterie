@@ -2,6 +2,16 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { calculateJewelryPrice } from "@/lib/pricing";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+
+async function requireAdmin() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user || session.user.role !== "admin") {
+    return null;
+  }
+  return session;
+}
 
 const productSchema = z.object({
   name: z.string().min(2),
@@ -61,6 +71,10 @@ function buildPayload(data: z.infer<typeof productSchema>) {
 }
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const session = await requireAdmin();
+if (!session) {
+  return NextResponse.json({ ok: false, message: "Non autorisé." }, { status: 403 });
+}
   try {
     const { id } = await params;
     const body = await request.json();
@@ -83,6 +97,10 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 }
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const session = await requireAdmin();
+if (!session) {
+  return NextResponse.json({ ok: false, message: "Non autorisé." }, { status: 403 });
+}
   try {
     const { id } = await params;
 

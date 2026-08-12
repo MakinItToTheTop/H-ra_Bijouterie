@@ -6,6 +6,7 @@ import { ToastProvider } from "@/components/Toast";
 import { CustomCursor } from "@/components/CustomCursor";
 import { ClickBurst } from "@/components/ClickBurst";
 import { JewelAdvisor } from "@/components/JewelAdvisor";
+import { InstagramAdPlayer } from "@/components/InstagramAdPlayer";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -15,6 +16,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           <CustomCursor />
           <ClickBurst />
           <JewelAdvisor />
+          <InstagramAdPlayer />
           {children}
         </CartProvider>
       </ToastProvider>

@@ -1,14 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { X, Minus } from "lucide-react";
-
-// Colle ici les liens de tes reels/posts Instagram (@herabijouterie44)
-// à jouer dans le lecteur. Format : lien "Copier le lien" depuis Instagram.
-const REELS: string[] = [
-  "https://www.instagram.com/reel/DYjfVvmIkjc/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
-  "https://www.instagram.com/reel/DPYsJsVCMqL/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
-];
+import { X } from "lucide-react";
 
 // Icône Instagram : retirée de lucide-react à partir de la v1 (icônes de marque
 // supprimées), on utilise donc notre propre SVG à la place.
@@ -31,16 +24,26 @@ function Instagram({ className }: { className?: string }) {
   );
 }
 
+// Colle ici les liens de tes reels/posts Instagram (@herabijouterie44)
+// à jouer dans le lecteur. Format : lien "Copier le lien" depuis Instagram.
+const REELS: string[] = [
+  "https://www.instagram.com/reel/DYjfVvmIkjc/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+  "https://www.instagram.com/reel/DPYsJsVCMqL/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+];
+
+// Délai entre deux reels en mode défilement automatique (en ms).
+// Instagram ne fournit pas d'événement "vidéo terminée" via son embed officiel,
+// on avance donc sur un minuteur plutôt que sur la fin réelle de la vidéo.
+const AUTO_ADVANCE_MS = 20000;
+
 declare global {
   interface Window {
     instgrm?: { Embeds: { process: () => void } };
   }
 }
 
-type PlayerState = "open" | "minimized" | "closed";
-
 export function InstagramAdPlayer() {
-  const [state, setState] = useState<PlayerState>("open");
+  const [isOpen, setIsOpen] = useState(false); // fermé par défaut
   const [index, setIndex] = useState(0);
   const [position, setPosition] = useState({ x: 24, y: 96 });
   const dragOffset = useRef({ x: 0, y: 0 });
@@ -61,10 +64,19 @@ export function InstagramAdPlayer() {
 
   // Redemande le rendu de l'embed à chaque fois qu'on affiche un nouveau post
   useEffect(() => {
-    if (state === "open") {
+    if (isOpen) {
       window.instgrm?.Embeds.process();
     }
-  }, [state, index]);
+  }, [isOpen, index]);
+
+  // Défilement automatique en boucle tant que le lecteur est ouvert
+  useEffect(() => {
+    if (!isOpen || REELS.length <= 1) return;
+    const timer = setInterval(() => {
+      setIndex((i) => (i + 1) % REELS.length);
+    }, AUTO_ADVANCE_MS);
+    return () => clearInterval(timer);
+  }, [isOpen]);
 
   const startDrag = (e: React.PointerEvent) => {
     isDragging.current = true;
@@ -86,62 +98,55 @@ export function InstagramAdPlayer() {
     isDragging.current = false;
   };
 
-  if (state === "closed") {
-    return (
+  return (
+    <>
+      {/* Icône fermée — visible par défaut, disparaît (zoom out) à l'ouverture */}
       <button
         type="button"
-        onClick={() => setState("open")}
-        aria-label="Rouvrir les vidéos Héra"
-        className="fixed bottom-4 left-4 z-[996] flex h-12 w-12 items-center justify-center rounded-full bg-espresso text-white shadow-lg transition-transform hover:scale-110"
+        onClick={() => setIsOpen(true)}
+        aria-label="Ouvrir les vidéos Héra"
+        className={`fixed bottom-4 left-4 z-[996] flex h-12 w-12 items-center justify-center rounded-full bg-espresso text-white shadow-lg transition-all duration-300 ease-out hover:scale-110 ${
+          isOpen ? "pointer-events-none scale-0 opacity-0" : "scale-100 opacity-100"
+        }`}
       >
         <Instagram className="h-5 w-5" />
       </button>
-    );
-  }
 
-  return (
-    <div
-      className="fixed z-[996] w-72 overflow-hidden rounded-2xl border border-line bg-white shadow-[0_8px_24px_rgba(35,23,17,0.25)]"
-      style={{ left: position.x, top: position.y }}
-    >
+      {/* Panneau du lecteur — toujours monté, animé en scale/opacity depuis
+          le coin bas-gauche (origin-bottom-left) pour l'effet zoom out / zoom in */}
       <div
-        onPointerDown={startDrag}
-        onPointerMove={onDrag}
-        onPointerUp={stopDrag}
-        className="flex cursor-grab items-center justify-between bg-[#fffaf3] px-3 py-2 active:cursor-grabbing"
+        className={`fixed z-[996] w-[340px] max-w-[calc(100vw-2rem)] origin-bottom-left overflow-hidden rounded-2xl border border-line bg-white shadow-[0_8px_24px_rgba(35,23,17,0.25)] transition-all duration-300 ease-out ${
+          isOpen ? "scale-100 opacity-100" : "pointer-events-none scale-0 opacity-0"
+        }`}
+        style={{ left: position.x, top: position.y }}
       >
-        <div className="flex items-center gap-1.5 text-xs font-medium text-[#231711]">
-          <Instagram className="h-3.5 w-3.5" />
-          Héra Bijouterie
-        </div>
-        <div className="flex items-center gap-1">
+        <div
+          onPointerDown={startDrag}
+          onPointerMove={onDrag}
+          onPointerUp={stopDrag}
+          className="flex cursor-grab items-center justify-between bg-[#fffaf3] px-3 py-2 active:cursor-grabbing"
+        >
+          <div className="flex items-center gap-1.5 text-xs font-medium text-[#231711]">
+            <Instagram className="h-3.5 w-3.5" />
+            Héra Bijouterie
+          </div>
           <button
             type="button"
-            onClick={() => setState(state === "minimized" ? "open" : "minimized")}
-            aria-label={state === "minimized" ? "Agrandir" : "Réduire"}
-            className="rounded-full p-1 text-ink-soft hover:bg-[#f4e7c9]"
-          >
-            <Minus className="h-3.5 w-3.5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setState("closed")}
+            onClick={() => setIsOpen(false)}
             aria-label="Fermer"
             className="rounded-full p-1 text-ink-soft hover:bg-[#f4e7c9]"
           >
             <X className="h-3.5 w-3.5" />
           </button>
         </div>
-      </div>
 
-      {state === "open" && (
-        <div className="max-h-[420px] overflow-y-auto">
+        <div className="max-h-[420px] w-full overflow-x-hidden overflow-y-auto">
           <blockquote
             key={REELS[index]}
-            className="instagram-media"
+            className="instagram-media !w-full !min-w-0 !max-w-full"
             data-instgrm-permalink={REELS[index]}
             data-instgrm-version="14"
-            style={{ margin: 0, width: "100%" }}
+            style={{ margin: 0, width: "100%", minWidth: 0, maxWidth: "100%" }}
           />
           {REELS.length > 1 && (
             <div className="flex justify-center gap-1.5 border-t border-line py-2">
@@ -157,7 +162,7 @@ export function InstagramAdPlayer() {
             </div>
           )}
         </div>
-      )}
-    </div>
+      </div>
+    </>
   );
 }

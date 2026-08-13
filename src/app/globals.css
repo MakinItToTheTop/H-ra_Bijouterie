@@ -105,6 +105,13 @@ img {
   }
 }
 
+.instagram-media,
+.instagram-media iframe {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
 @layer base {
   a {
     text-decoration: none;

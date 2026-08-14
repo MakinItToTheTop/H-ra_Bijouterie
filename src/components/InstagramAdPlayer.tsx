@@ -48,6 +48,7 @@ export function InstagramAdPlayer() {
   const [position, setPosition] = useState({ x: 24, y: 96 });
   const dragOffset = useRef({ x: 0, y: 0 });
   const isDragging = useRef(false);
+  const embedContainerRef = useRef<HTMLDivElement>(null);
 
   // Charge le script officiel d'embed Instagram une seule fois
   useEffect(() => {
@@ -62,11 +63,22 @@ export function InstagramAdPlayer() {
     document.body.appendChild(script);
   }, []);
 
-  // Redemande le rendu de l'embed à chaque fois qu'on affiche un nouveau post
+  // Recrée manuellement le blockquote Instagram à chaque changement de reel,
+  // en dehors du rendu React, pour éviter les conflits DOM avec embed.js
+  // (qui remplace le blockquote par un iframe et fait planter React sinon).
   useEffect(() => {
-    if (isOpen) {
-      window.instgrm?.Embeds.process();
-    }
+    if (!isOpen || !embedContainerRef.current) return;
+
+    embedContainerRef.current.innerHTML = `
+      <blockquote
+        class="instagram-media"
+        data-instgrm-permalink="${REELS[index]}"
+        data-instgrm-version="14"
+        style="margin:0;width:100%;min-width:0;max-width:100%;"
+      ></blockquote>
+    `;
+
+    window.instgrm?.Embeds.process();
   }, [isOpen, index]);
 
   // Défilement automatique en boucle tant que le lecteur est ouvert
@@ -141,13 +153,7 @@ export function InstagramAdPlayer() {
         </div>
 
         <div className="max-h-[420px] w-full overflow-x-hidden overflow-y-auto">
-          <blockquote
-            key={REELS[index]}
-            className="instagram-media !w-full !min-w-0 !max-w-full"
-            data-instgrm-permalink={REELS[index]}
-            data-instgrm-version="14"
-            style={{ margin: 0, width: "100%", minWidth: 0, maxWidth: "100%" }}
-          />
+          <div ref={embedContainerRef} className="w-full" />
           {REELS.length > 1 && (
             <div className="flex justify-center gap-1.5 border-t border-line py-2">
               {REELS.map((_, i) => (

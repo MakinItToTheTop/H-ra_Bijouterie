@@ -34,7 +34,7 @@ const REELS: string[] = [
 // Délai entre deux reels en mode défilement automatique (en ms).
 // Instagram ne fournit pas d'événement "vidéo terminée" via son embed officiel,
 // on avance donc sur un minuteur plutôt que sur la fin réelle de la vidéo.
-const AUTO_ADVANCE_MS = 20000;
+const AUTO_ADVANCE_MS = 25000;
 
 declare global {
   interface Window {

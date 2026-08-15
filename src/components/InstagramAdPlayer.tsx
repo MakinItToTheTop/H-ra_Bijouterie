@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { X } from "lucide-react";
+import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
 // Icône Instagram : retirée de lucide-react à partir de la v1 (icônes de marque
 // supprimées), on utilise donc notre propre SVG à la place.
@@ -110,6 +110,14 @@ export function InstagramAdPlayer() {
     isDragging.current = false;
   };
 
+  const goPrev = () => {
+  setIndex((i) => (i - 1 + REELS.length) % REELS.length);
+};
+
+const goNext = () => {
+  setIndex((i) => (i + 1) % REELS.length);
+};
+
   return (
     <>
       {/* Icône fermée — visible par défaut, disparaît (zoom out) à l'ouverture */}
@@ -154,19 +162,30 @@ export function InstagramAdPlayer() {
 
         <div className="max-h-[420px] w-full overflow-x-hidden overflow-y-auto">
           <div ref={embedContainerRef} className="w-full" />
-          {REELS.length > 1 && (
-            <div className="flex justify-center gap-1.5 border-t border-line py-2">
-              {REELS.map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => setIndex(i)}
-                  aria-label={`Vidéo ${i + 1}`}
-                  className={`h-1.5 w-1.5 rounded-full ${i === index ? "bg-espresso" : "bg-[#e5d1ab]"}`}
-                />
-              ))}
-            </div>
-          )}
+          // APRÈS
+{REELS.length > 1 && (
+  <div className="flex items-center justify-between border-t border-line px-2 py-1.5">
+    <button
+      type="button"
+      onClick={goPrev}
+      aria-label="Vidéo précédente"
+      className="rounded-full p-1 text-ink-soft hover:bg-[#f4e7c9]"
+    >
+      <ChevronLeft className="h-4 w-4" />
+    </button>
+    <span className="text-xs text-ink-soft">
+      {index + 1} / {REELS.length}
+    </span>
+    <button
+      type="button"
+      onClick={goNext}
+      aria-label="Vidéo suivante"
+      className="rounded-full p-1 text-ink-soft hover:bg-[#f4e7c9]"
+    >
+      <ChevronRight className="h-4 w-4" />
+    </button>
+  </div>
+)}
         </div>
       </div>
     </>

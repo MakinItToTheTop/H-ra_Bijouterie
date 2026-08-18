@@ -162,7 +162,7 @@ const goNext = () => {
 
         <div className="max-h-[420px] w-full overflow-x-hidden overflow-y-auto">
           <div ref={embedContainerRef} className="w-full" />
-          // APRÈS
+         
 {REELS.length > 1 && (
   <div className="flex items-center justify-between border-t border-line px-2 py-1.5">
     <button

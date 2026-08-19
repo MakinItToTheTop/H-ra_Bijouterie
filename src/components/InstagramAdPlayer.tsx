@@ -122,15 +122,15 @@ const goNext = () => {
     <>
       {/* Icône fermée — visible par défaut, disparaît (zoom out) à l'ouverture */}
       <button
-        type="button"
-        onClick={() => setIsOpen(true)}
-        aria-label="Ouvrir les vidéos Héra"
-        className={`fixed z-[996] w-[340px] max-w-[calc(100vw-2rem)] origin-bottom-left overflow-hidden rounded-2xl border border-line bg-white shadow-[0_8px_24px_rgba(35,23,17,0.25)] transition-[transform,opacity] duration-300 ease-out ${
-  isOpen ? "scale-100 opacity-100" : "pointer-events-none scale-0 opacity-0"
-}`}
-      >
-        <Instagram className="h-5 w-5" />
-      </button>
+  type="button"
+  onClick={() => setIsOpen(true)}
+  aria-label="Ouvrir les vidéos Héra"
+  className={`fixed bottom-4 left-4 z-[996] flex h-12 w-12 items-center justify-center rounded-full bg-espresso text-white shadow-lg transition-[transform,opacity] duration-300 ease-out hover:scale-110 ${
+    isOpen ? "pointer-events-none scale-0 opacity-0" : "scale-100 opacity-100"
+  }`}
+>
+  <Instagram className="h-5 w-5" />
+</button>
 
       {/* Panneau du lecteur — toujours monté, animé en scale/opacity depuis
           le coin bas-gauche (origin-bottom-left) pour l'effet zoom out / zoom in */}

@@ -135,9 +135,10 @@ const goNext = () => {
       {/* Panneau du lecteur — toujours monté, animé en scale/opacity depuis
           le coin bas-gauche (origin-bottom-left) pour l'effet zoom out / zoom in */}
       <div
-        className={`fixed z-[996] w-[340px] max-w-[calc(100vw-2rem)] origin-bottom-left overflow-hidden rounded-2xl border border-line bg-white shadow-[0_8px_24px_rgba(35,23,17,0.25)] transition-all duration-300 ease-out ${
-          isOpen ? "scale-100 opacity-100" : "pointer-events-none scale-0 opacity-0"
-        }`}
+        // APRÈS
+className={`fixed z-[996] w-[340px] max-w-[calc(100vw-2rem)] origin-bottom-left overflow-hidden rounded-2xl border border-line bg-white shadow-[0_8px_24px_rgba(35,23,17,0.25)] transition-[transform,opacity] duration-300 ease-out ${
+  isOpen ? "scale-100 opacity-100" : "pointer-events-none scale-0 opacity-0"
+}`}
         style={{ left: position.x, top: position.y }}
       >
         <div

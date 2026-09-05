@@ -54,7 +54,7 @@ export async function POST(request: Request) {
       mode: "payment",
       line_items: lineItems,
       success_url: `${baseUrl}/checkout?success=1`,
-      cancel_url: `${baseUrl}/panier?cancel=1`,
+      cancel_url: `${baseUrl}/panier?cancel=1&orderId=${body.orderId ?? ""}`,
       customer_email: body.customer?.email,
       metadata: { orderId: body.orderId ?? "demo-order" },
     });

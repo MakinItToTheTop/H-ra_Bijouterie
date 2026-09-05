@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   AlertTriangle,
@@ -21,7 +23,18 @@ import {
 
 export default function PanierPage() {
   const { items, subtotal, updateQuantity, removeItem, hydrated, stockAdjustedIds } = useCart();
+  const searchParams = useSearchParams();
 
+useEffect(() => {
+  const orderId = searchParams.get("orderId");
+  if (searchParams.get("cancel") === "1" && orderId) {
+    fetch(`/api/orders/${orderId}/abandon`, { method: "POST" }).catch(() => {
+      // best effort : si ça échoue, la commande reste "en attente" et sera
+      // nettoyée manuellement depuis l'admin, rien de bloquant pour le client
+    });
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [searchParams]);
   const shipping = subtotal >= FREE_SHIPPING_THRESHOLD || subtotal === 0 ? 0 : SHIPPING_FEE;
   const total = subtotal + shipping;
   const vatIncluded = total - total / (1 + VAT_RATE);

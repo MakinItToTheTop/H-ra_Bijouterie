@@ -1,5 +1,5 @@
 "use client";
-
+import { Suspense, useEffect } from "react";
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -21,7 +21,7 @@ import {
   formatPrice,
 } from "@/lib/format";
 
-export default function PanierPage() {
+function PanierPageContent() {
   const { items, subtotal, updateQuantity, removeItem, hydrated, stockAdjustedIds } = useCart();
   const searchParams = useSearchParams();
 
@@ -260,5 +260,13 @@ useEffect(() => {
         </div>
       )}
     </div>
+  );
+}
+
+export default function PanierPage() {
+  return (
+    <Suspense fallback={null}>
+      <PanierPageContent />
+    </Suspense>
   );
 }

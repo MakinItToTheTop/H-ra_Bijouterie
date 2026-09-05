@@ -49,7 +49,11 @@ export function ClickBurst() {
 
 function BurstParticles({ x, y }: { x: number; y: number }) {
   const [expanded, setExpanded] = useState(false);
-  const particlesRef = useRef(
+  // Initialiseur "paresseux" de useState : autorisé à contenir du code
+  // impur (Math.random) car React ne l'exécute qu'une seule fois, jamais
+  // pendant le rendu proprement dit — contrairement à un argument de
+  // useRef, qui est évalué à chaque rendu même si sa valeur est ignorée.
+  const [particles] = useState(() =>
     Array.from({ length: PARTICLES_PER_BURST }, (_, i) => {
       const angle = (i / PARTICLES_PER_BURST) * Math.PI * 2 + Math.random() * 0.4;
       const distance = 18 + Math.random() * 14;
@@ -72,7 +76,7 @@ function BurstParticles({ x, y }: { x: number; y: number }) {
 
   return (
     <>
-      {particlesRef.current.map((p, i) => (
+      {particles.map((p, i) => (
         <span
           key={i}
           className="absolute rounded-full bg-[#c19a5b] transition-[transform,opacity] ease-out"

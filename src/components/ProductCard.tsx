@@ -4,16 +4,18 @@ import Link from "next/link";
 import { useState } from "react";
 import { Check, Eye, Heart, ShoppingBag, Star } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 import { useToast } from "@/components/Toast";
 import { formatPrice } from "@/lib/format";
 import type { Product } from "@/data/products";
 
 export function ProductCard({ product, priority = false }: { product: Product; priority?: boolean }) {
   const { addItem } = useCart();
+  const { isWished, toggleWish } = useWishlist();
   const { toast } = useToast();
   const [loaded, setLoaded] = useState(false);
   const [added, setAdded] = useState(false);
-  const [wished, setWished] = useState(false);
+  const wished = isWished(product.id);
 
   const outOfStock = product.stock <= 0;
   const discount =
@@ -73,7 +75,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           type="button"
           aria-label={wished ? "Retirer de la wishlist" : "Ajouter à la wishlist"}
           aria-pressed={wished}
-          onClick={() => setWished((value) => !value)}
+          onClick={() => toggleWish(product.id)}
           className="press absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-espresso shadow-md backdrop-blur hover:bg-white"
         >
           <Heart

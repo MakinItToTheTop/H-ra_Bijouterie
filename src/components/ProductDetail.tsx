@@ -14,12 +14,14 @@ import {
   Star,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 import { useToast } from "@/components/Toast";
 import { formatPrice } from "@/lib/format";
 import type { Product } from "@/data/products";
 
 export function ProductDetail({ product }: { product: Product }) {
   const { addItem } = useCart();
+  const { isWished, toggleWish } = useWishlist();
   const { toast } = useToast();
 
   const images = [product.image, ...(product.gallery ?? []).filter((src) => src !== product.image)];
@@ -28,7 +30,7 @@ export function ProductDetail({ product }: { product: Product }) {
   const [quantity, setQuantity] = useState(1);
   const [size, setSize] = useState(product.sizeOptions?.[0] ?? "");
   const [added, setAdded] = useState(false);
-  const [wished, setWished] = useState(false);
+  const wished = isWished(product.id);
 
   const outOfStock = product.stock <= 0;
   const maxQuantity = Math.max(1, product.stock);
@@ -221,7 +223,7 @@ export function ProductDetail({ product }: { product: Product }) {
 
             <button
               type="button"
-              onClick={() => setWished((value) => !value)}
+              onClick={() => toggleWish(product.id)}
               aria-pressed={wished}
               aria-label="Ajouter à la wishlist"
               className="press inline-flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-full border border-[#d7b77a] bg-[#fff5e2] text-espresso hover:border-gold"

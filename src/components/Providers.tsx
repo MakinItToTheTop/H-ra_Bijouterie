@@ -2,6 +2,7 @@
 
 import { SessionProvider } from "next-auth/react";
 import { CartProvider } from "@/context/CartContext";
+import { WishlistProvider } from "@/context/WishlistContext";
 import { ToastProvider } from "@/components/Toast";
 import { CustomCursor } from "@/components/CustomCursor";
 import { ClickBurst } from "@/components/ClickBurst";
@@ -13,11 +14,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <SessionProvider>
       <ToastProvider>
         <CartProvider>
-          <CustomCursor />
-          <ClickBurst />
-          <JewelAdvisor />
-          <InstagramAdPlayer />
-          {children}
+          <WishlistProvider>
+            <CustomCursor />
+            <ClickBurst />
+            <JewelAdvisor />
+            <InstagramAdPlayer />
+            {children}
+          </WishlistProvider>
         </CartProvider>
       </ToastProvider>
     </SessionProvider>

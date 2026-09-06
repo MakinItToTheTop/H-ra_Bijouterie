@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
+import { stripe } from "@/lib/stripe";
 
 const VALID_STATUSES = ["en attente", "payée", "expédiée", "prête à récupérer", "livrée", "annulée"];
 
@@ -57,9 +58,45 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ ok: false, message: "Commande introuvable." }, { status: 404 });
     }
 
+    // Une commande déjà livrée ne peut plus être annulée : le bijou est chez
+    // le client, l'annulation devrait passer par un retour, pas par ce flux.
+    if (status === "annulée" && existing.status === "livrée") {
+      return NextResponse.json(
+        { ok: false, message: "Une commande déjà livrée ne peut pas être annulée." },
+        { status: 400 }
+      );
+    }
+
     // Le stock ne doit être décrémenté qu'une seule fois : au moment précis où
     // la commande BASCULE vers "payée" (pas si elle l'était déjà).
     const justPaid = status === "payée" && existing.status === "en attente";
+
+    // Une commande n'a un stripePaymentIntentId que si le webhook Stripe a
+    // confirmé un paiement (voir /api/webhooks/stripe) : c'est donc le signal
+    // fiable qu'un paiement a réellement eu lieu et que le stock a été
+    // décrémenté. On ne déclenche le remboursement/restock que dans ce cas,
+    // et uniquement si la commande n'était pas déjà annulée (idempotence).
+    const isCancelling =
+      status === "annulée" && existing.status !== "annulée" && Boolean(existing.stripePaymentIntentId);
+
+    if (isCancelling) {
+      if (!stripe) {
+        return NextResponse.json({ ok: false, message: "Stripe non configuré." }, { status: 500 });
+      }
+
+      // On déclenche le remboursement AVANT de toucher à la base : si Stripe
+      // refuse (paiement déjà remboursé, litige en cours...), on ne modifie
+      // rien côté commande/stock.
+      try {
+        await stripe.refunds.create({ payment_intent: existing.stripePaymentIntentId! });
+      } catch (error) {
+        console.error("Admin order cancel: échec du remboursement Stripe", error);
+        return NextResponse.json(
+          { ok: false, message: "Le remboursement Stripe a échoué, la commande n'a pas été annulée." },
+          { status: 500 }
+        );
+      }
+    }
 
     const updated = await prisma.$transaction(async (tx) => {
       if (justPaid) {
@@ -76,6 +113,15 @@ export async function PATCH(request: Request) {
           await tx.product.update({
             where: { id: item.productId },
             data: { stock: { decrement: item.quantity } },
+          });
+        }
+      }
+
+      if (isCancelling) {
+        for (const item of existing.items) {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: { stock: { increment: item.quantity } },
           });
         }
       }

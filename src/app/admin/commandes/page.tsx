@@ -331,11 +331,13 @@ const notifyReady = async () => {
                 initial avant paiement) : on ne l'affiche que si la commande
                 s'y trouve déjà, pour ne pas la laisser bloquée sans option. */}
             {order.status === "en attente" && <option value="en attente">en attente</option>}
-            {(order.shippingMode === "retrait" ? PICKUP_STATUSES : DELIVERY_STATUSES).map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
+            {(order.shippingMode === "retrait" ? PICKUP_STATUSES : DELIVERY_STATUSES)
+              .filter((option) => !(option === "annulée" && order.status === "livrée"))
+              .map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
           </select>
           {order.shippingMode === "retrait" && order.status === "prête à récupérer" && (
   <button
